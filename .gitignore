@@ -1,0 +1,10 @@
+.*.swp
+
+*.l.c
+*.c.d
+*.c.o
+*.a
+*.so
+qasm2
+
+tags
