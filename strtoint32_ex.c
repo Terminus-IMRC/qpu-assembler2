@@ -59,9 +59,9 @@ int32_t strtoint32_ex(const char *str, char **endptr)
 			str_prop[j++] = str[i];
 
 	errno = 0;
-	num = strtol(str_prop, endptr, base);
-	if ((errno == ERANGE && num == LONG_MAX) || (errno != 0 && num == 0)) {
-		error_fl(__FILE__, __LINE__, "strtoul: %s\n", strerror(errno));
+	num = strtoul(str_prop, endptr, base);
+	if (((errno == ERANGE) && ((unsigned long int) num == ULONG_MAX)) || ((errno != 0) && (num == 0))) {
+		error_fl(__FILE__, __LINE__, "strtoul: %s: %s (base=%d)\n", strerror(errno), str_prop, base);
 		return (num == LONG_MAX) ? INT32_MAX : 0;
 	}
 
