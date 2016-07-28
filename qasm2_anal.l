@@ -1111,10 +1111,10 @@ static void inst_init(inst_inst_t inst_inst)
 			inst.raddr_b = INST_RWADDR_ADDMULAB_NOP;
 			inst.op_mul = INST_OP_MUL_NOP;
 			inst.op_add = INST_OP_ADD_NOP;
-			inst.add_a = INST_ADDMUL_AB_RA;
-			inst.add_b = INST_ADDMUL_AB_RA;
-			inst.mul_a = INST_ADDMUL_AB_RA;
-			inst.mul_b = INST_ADDMUL_AB_RA;
+			inst.add_a = INST_ADDMUL_AB_R0;
+			inst.add_b = INST_ADDMUL_AB_R0;
+			inst.mul_a = INST_ADDMUL_AB_R0;
+			inst.mul_b = INST_ADDMUL_AB_R0;
 			break;
 
 		case INST_BRA:
