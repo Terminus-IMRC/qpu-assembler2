@@ -590,7 +590,10 @@ imm=`[^`\n\r]+` li_imm_save_or_expand(yytext + 4);
 [ \t]+ ;
 
 ^[ \t]*:[^ \t\n\r]+[ \t]*(\n|\r|\r\n) {
-	bra_label_save(yytext + 1);
+	const char *p = yytext;
+	while ((*p == ' ') || (*p == '\t'))
+		p++;
+	bra_label_save(p + 1);
 	end_of_line(1);
 }
 
