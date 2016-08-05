@@ -667,159 +667,103 @@ ws=1 alu_ws(INST_WS_1);
 
 [rw]addr_(add|mul|a|b)=ra0 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA0);
 [rw]addr_(add|mul|a|b)=rb0 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB0);
-
 [rw]addr_(add|mul|a|b)=ra1 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA1);
 [rw]addr_(add|mul|a|b)=rb1 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB1);
-
 [rw]addr_(add|mul|a|b)=ra2 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA2);
 [rw]addr_(add|mul|a|b)=rb2 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB2);
-
 [rw]addr_(add|mul|a|b)=ra3 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA3);
 [rw]addr_(add|mul|a|b)=rb3 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB3);
-
 [rw]addr_(add|mul|a|b)=ra4 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA4);
 [rw]addr_(add|mul|a|b)=rb4 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB4);
-
 [rw]addr_(add|mul|a|b)=ra5 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA5);
 [rw]addr_(add|mul|a|b)=rb5 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB5);
-
 [rw]addr_(add|mul|a|b)=ra6 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA6);
 [rw]addr_(add|mul|a|b)=rb6 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB6);
-
 [rw]addr_(add|mul|a|b)=ra7 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA7);
 [rw]addr_(add|mul|a|b)=rb7 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB7);
-
 [rw]addr_(add|mul|a|b)=ra8 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA8);
 [rw]addr_(add|mul|a|b)=rb8 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB8);
-
 [rw]addr_(add|mul|a|b)=ra9 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA9);
 [rw]addr_(add|mul|a|b)=rb9 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB9);
-
 [rw]addr_(add|mul|a|b)=ra10 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA10);
 [rw]addr_(add|mul|a|b)=rb10 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB10);
-
 [rw]addr_(add|mul|a|b)=ra11 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA11);
 [rw]addr_(add|mul|a|b)=rb11 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB11);
-
 [rw]addr_(add|mul|a|b)=ra12 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA12);
 [rw]addr_(add|mul|a|b)=rb12 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB12);
-
 [rw]addr_(add|mul|a|b)=ra13 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA13);
 [rw]addr_(add|mul|a|b)=rb13 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB13);
-
 [rw]addr_(add|mul|a|b)=ra14 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA14);
 [rw]addr_(add|mul|a|b)=rb14 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB14);
-
 [rw]addr_(add|mul|a|b)=ra15 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA15);
 [rw]addr_(add|mul|a|b)=rb15 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB15);
-
 [rw]addr_(add|mul|a|b)=ra16 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA16);
 [rw]addr_(add|mul|a|b)=rb16 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB16);
-
 [rw]addr_(add|mul|a|b)=ra17 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA17);
 [rw]addr_(add|mul|a|b)=rb17 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB17);
-
 [rw]addr_(add|mul|a|b)=ra18 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA18);
 [rw]addr_(add|mul|a|b)=rb18 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB18);
-
 [rw]addr_(add|mul|a|b)=ra19 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA19);
 [rw]addr_(add|mul|a|b)=rb19 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB19);
-
 [rw]addr_(add|mul|a|b)=ra20 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA20);
 [rw]addr_(add|mul|a|b)=rb20 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB20);
-
 [rw]addr_(add|mul|a|b)=ra21 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA21);
 [rw]addr_(add|mul|a|b)=rb21 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB21);
-
 [rw]addr_(add|mul|a|b)=ra22 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA22);
 [rw]addr_(add|mul|a|b)=rb22 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB22);
-
 [rw]addr_(add|mul|a|b)=ra23 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA23);
 [rw]addr_(add|mul|a|b)=rb23 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB23);
-
 [rw]addr_(add|mul|a|b)=ra24 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA24);
 [rw]addr_(add|mul|a|b)=rb24 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB24);
-
 [rw]addr_(add|mul|a|b)=ra25 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA25);
 [rw]addr_(add|mul|a|b)=rb25 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB25);
-
 [rw]addr_(add|mul|a|b)=ra26 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA26);
 [rw]addr_(add|mul|a|b)=rb26 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB26);
-
 [rw]addr_(add|mul|a|b)=ra27 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA27);
 [rw]addr_(add|mul|a|b)=rb27 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB27);
-
 [rw]addr_(add|mul|a|b)=ra28 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA28);
 [rw]addr_(add|mul|a|b)=rb28 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB28);
-
 [rw]addr_(add|mul|a|b)=ra29 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA29);
 [rw]addr_(add|mul|a|b)=rb29 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB29);
-
 [rw]addr_(add|mul|a|b)=ra30 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA30);
 [rw]addr_(add|mul|a|b)=rb30 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB30);
-
 [rw]addr_(add|mul|a|b)=ra31 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RA31);
 [rw]addr_(add|mul|a|b)=rb31 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_RB31);
-
 [rw]addr_(add|mul|a|b)=uniform_read alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_UNIFORM_READ);
 [rw]addr_(add|mul|a|b)=r0 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_R0);
-
 [rw]addr_(add|mul|a|b)=r1 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_R1);
-
 [rw]addr_(add|mul|a|b)=r2 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_R2);
-
 [rw]addr_(add|mul|a|b)=r3 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_R3);
-
 [rw]addr_(add|mul|a|b)=tmu_noswap alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU_NOSWAP);
-
 [rw]addr_(add|mul|a|b)=r5 alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_R5);
-
 [rw]addr_(add|mul|a|b)=element_number alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_ELEMENT_NUMBER);
 [rw]addr_(add|mul|a|b)=qpu_number alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_QPU_NUMBER);
 [rw]addr_(add|mul|a|b)=host_int alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_HOST_INT);
-
 [rw]addr_(add|mul|a|b)=nop alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_NOP);
-
 [rw]addr_(add|mul|a|b)=uniforms_address alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_UNIFORMS_ADDRESS);
-
 [rw]addr_(add|mul|a|b)=vpm_read alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_READ);
 [rw]addr_(add|mul|a|b)=vpm_write alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_WRITE);
-
 [rw]addr_(add|mul|a|b)=vpm_ld_busy alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_LD_BUSY);
 [rw]addr_(add|mul|a|b)=vpm_st_busy alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_ST_BUSY);
 [rw]addr_(add|mul|a|b)=vpmvcd_wr_setup alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPMVCD_WR_SETUP);
 [rw]addr_(add|mul|a|b)=vpmvcd_rd_setup alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPMVCD_RD_SETUP);
-
 [rw]addr_(add|mul|a|b)=vpm_ld_wait alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_LD_WAIT);
 [rw]addr_(add|mul|a|b)=vpm_st_wait alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_ST_WAIT);
 [rw]addr_(add|mul|a|b)=vpm_ld_addr alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_LD_ADDR);
 [rw]addr_(add|mul|a|b)=vpm_st_addr alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_VPM_ST_ADDR);
-
 [rw]addr_(add|mul|a|b)=mutex_acquire alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_MUTEX_ACQUIRE);
 [rw]addr_(add|mul|a|b)=mutex_release alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_MUTEX_RELEASE);
-
 [rw]addr_(add|mul|a|b)=sfu_recip alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_SFU_RECIP);
-
 [rw]addr_(add|mul|a|b)=sfu_recipsqrt alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_SFU_RECIPSQRT);
-
 [rw]addr_(add|mul|a|b)=sfu_exp alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_SFU_EXP);
-
 [rw]addr_(add|mul|a|b)=sfu_log alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_SFU_LOG);
-
 [rw]addr_(add|mul|a|b)=tmu0s alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU0S);
-
 [rw]addr_(add|mul|a|b)=tmu0t alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU0T);
-
 [rw]addr_(add|mul|a|b)=tmu0r alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU0R);
-
 [rw]addr_(add|mul|a|b)=tmu0b alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU0B);
-
 [rw]addr_(add|mul|a|b)=tmu1s alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU1S);
-
 [rw]addr_(add|mul|a|b)=tmu1t alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU1T);
-
 [rw]addr_(add|mul|a|b)=tmu1r alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU1R);
-
 [rw]addr_(add|mul|a|b)=tmu1b alu_rwaddr_addmulab(str_to_id_rwaddr_addmulab(yytext), INST_RWADDR_ADDMULAB_TMU1B);
 
 simm=0 alu_simm(INST_SIMM_0);
