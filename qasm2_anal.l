@@ -545,17 +545,19 @@ static id_addmul_ab_t str_to_id_addmul_ab(const char *str);
 
 static void valid_inst_inst(const int line, const int n, ...);
 
+static void bra_label_save(const char *str);
+
+static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surrounding_chars);
 static inst_simm_t midimm_to_simm(midimm_t midimm);
 static inst_imm_t midimm_to_imm(midimm_t midimm);
-static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surrounding_chars);
-static void bra_label_save(const char *str);
+
 static void alu_simm_rpn_save(const char *str);
 static void li_imm_rpn_save(const char *str);
-static void alu_simm_save_or_expand(const char *str);
-static void li_imm_save_or_expand(const char *str);
+static void alu_simm_rpn_save_or_expand(const char *str);
+static void li_imm_rpn_save_or_expand(const char *str);
+
 static char* remove_surrounding_chars(const char *str);
 static char* remove_trailing_spaces_and_newlines(const char *str);
-static void alu_simm_rpn_save(const char *str);
 
 static void print_inst();
 static void print_bin(const uint64_t u, unsigned int width, const _Bool to_print_space);
@@ -588,8 +590,9 @@ static void abort_assemble(const int line);
 
 %%
 
-simm=`[^`\n\r]+`/{sep} alu_simm_save_or_expand(yytext + 5);
-imm=`[^`\n\r]+`/{sep} li_imm_save_or_expand(yytext + 4);
+simm=`[^`\n\r]+`/{sep} alu_simm_rpn_save_or_expand(yytext + 5);
+simm=vr`[^`\n\r]+`/{sep} alu_vrsimm_rpn_save_or_expand(yytext + 7);
+imm=`[^`\n\r]+`/{sep} li_imm_rpn_save_or_expand(yytext + 4);
 
 {space}+ ;
 
@@ -1405,6 +1408,57 @@ static void valid_inst_inst(const int line, const int n, ...)
 		error_q(__FILE__, line, "error: This modifier is not supported in this inst_inst\n");
 }
 
+static void bra_label_save(const char *str)
+{
+	int i, n;
+	int max_len;
+	char *label_cur = NULL, *label = NULL;
+
+	label_cur = remove_trailing_spaces_and_newlines(str);
+
+	max_len = diskstorage_len_max(&ds_label);
+	label = malloc((max_len + 1) * sizeof(char));
+	if (label == NULL)
+		error_q(__FILE__, __LINE__, "error: Failed to allocate label\n");
+
+	n = diskstorage_n(&ds_label);
+	diskstorage_seek(0, &ds_label);
+	for (i = 0; i < n; i ++) {
+		int len;
+		len = diskstorage_read_next(label, max_len, &ds_label);
+		label[len] = '\0';
+		if (!strcmp(label_cur, label))
+			error_q(__FILE__, __LINE__, "error: Duplicated label: %s\n", label_cur);
+	}
+
+	free(label);
+	diskstorage_append(label_cur, strlen(label_cur), &ds_label);
+	diskstorage_append(&program_number, sizeof(program_number), &ds_label_program_number);
+	free(label_cur);
+}
+
+static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surrounding_chars)
+{
+	char *rpn = NULL;
+	midimm_t midimm;
+
+	if (to_remove_surrounding_chars)
+		rpn = remove_surrounding_chars(rpn_arg);
+	else {
+		rpn = strdup(rpn_arg);
+		if (rpn == NULL)
+			error_q(__FILE__, __LINE__, "error: strdup: %s\n", strerror(errno));
+	}
+
+	midimm.type = MIDIMM_TYPE_INT;
+	if (rpn_calc_do(&(midimm.ival), rpn))
+		error_q(__FILE__, __LINE__, "error: On rpn_calc_do\n");
+
+	free(rpn);
+
+	return midimm;
+}
+
 static inst_simm_t midimm_to_simm(midimm_t midimm)
 {
 	switch (midimm.type) {
@@ -1528,58 +1582,6 @@ static inst_imm_t midimm_to_imm(midimm_t midimm)
 			return midimm.fval;
 	}
 }
-
-static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surrounding_chars)
-{
-	char *rpn = NULL;
-	midimm_t midimm;
-
-	if (to_remove_surrounding_chars)
-		rpn = remove_surrounding_chars(rpn_arg);
-	else {
-		rpn = strdup(rpn_arg);
-		if (rpn == NULL)
-			error_q(__FILE__, __LINE__, "error: strdup: %s\n", strerror(errno));
-	}
-
-	midimm.type = MIDIMM_TYPE_INT;
-	if (rpn_calc_do(&(midimm.ival), rpn))
-		error_q(__FILE__, __LINE__, "error: On rpn_calc_do\n");
-
-	free(rpn);
-
-	return midimm;
-}
-
-static void bra_label_save(const char *str)
-{
-	int i, n;
-	int max_len;
-	char *label_cur = NULL, *label = NULL;
-
-	label_cur = remove_trailing_spaces_and_newlines(str);
-
-	max_len = diskstorage_len_max(&ds_label);
-	label = malloc((max_len + 1) * sizeof(char));
-	if (label == NULL)
-		error_q(__FILE__, __LINE__, "error: Failed to allocate label\n");
-
-	n = diskstorage_n(&ds_label);
-	diskstorage_seek(0, &ds_label);
-	for (i = 0; i < n; i ++) {
-		int len;
-		len = diskstorage_read_next(label, max_len, &ds_label);
-		label[len] = '\0';
-		if (!strcmp(label_cur, label))
-			error_q(__FILE__, __LINE__, "error: Duplicated label: %s\n", label_cur);
-	}
-
-	free(label);
-	diskstorage_append(label_cur, strlen(label_cur), &ds_label);
-	diskstorage_append(&program_number, sizeof(program_number), &ds_label_program_number);
-	free(label_cur);
-}
-
 static void alu_simm_rpn_save(const char *str)
 {
 	char *simm = NULL;
@@ -1606,7 +1608,7 @@ static void li_imm_rpn_save(const char *str)
 	INST_SAVED(imm);
 }
 
-static void alu_simm_save_or_expand(const char *str)
+static void alu_simm_rpn_save_or_expand(const char *str)
 {
 	valid_inst_inst(__LINE__, 1, INST_ALU);
 	if (inst.sig != INST_SIG_SIMM)
@@ -1617,7 +1619,7 @@ static void alu_simm_save_or_expand(const char *str)
 		alu_simm_rpn_save(str);
 }
 
-static void li_imm_save_or_expand(const char *str)
+static void li_imm_rpn_save_or_expand(const char *str)
 {
 	valid_inst_inst(__LINE__, 2, INST_BRA, INST_LI);
 	if (strchr(str, ':') == NULL)
