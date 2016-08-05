@@ -446,6 +446,13 @@ typedef struct {
 	float fval;
 } midimm_t;
 
+typedef enum {
+	SAVED_IMM_TYPE_NONE = 0,
+	SAVED_IMM_TYPE_SIMM,
+	SAVED_IMM_TYPE_VRSIMM,
+	SAVED_IMM_TYPE_IMM
+} saved_imm_type_t;
+
 typedef struct {
 	struct {
 		_Bool inst;
@@ -465,9 +472,7 @@ typedef struct {
 		_Bool imm;
 		_Bool sa, sem;
 	} is_set;
-	struct {
-		_Bool simm, imm;
-	} is_saved;
+	saved_imm_type_t saved_imm_type;
 	inst_inst_t inst;
 	inst_sig_t sig;
 	inst_esig_t esig;
@@ -511,7 +516,7 @@ typedef enum {
 
 static int line_number, program_number;
 static inst_t inst;
-static diskstorage_t ds_inst, ds_simm_imm_str, ds_label, ds_label_program_number;
+static diskstorage_t ds_inst, ds_imms_str, ds_label, ds_label_program_number;
 static jmp_buf jenv;
 
 static void assemble_init();
@@ -549,12 +554,11 @@ static void bra_label_save(const char *str);
 
 static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surrounding_chars);
 static inst_simm_t midimm_to_simm(midimm_t midimm);
+static inst_simm_t midimm_to_simm_vr(midimm_t midimm);
 static inst_imm_t midimm_to_imm(midimm_t midimm);
 
-static void alu_simm_rpn_save(const char *str);
-static void li_imm_rpn_save(const char *str);
-static void alu_simm_rpn_save_or_expand(const char *str);
-static void li_imm_rpn_save_or_expand(const char *str);
+static void imms_rpn_save(const saved_imm_type_t imm_type, const char *str);
+static void imms_rpn_save_or_expand(const saved_imm_type_t imm_type, const char *str);
 
 static char* remove_surrounding_chars(const char *str);
 static char* remove_trailing_spaces_and_newlines(const char *str);
@@ -575,24 +579,15 @@ static void abort_assemble(const int line);
 
 #define INST_SET(NAME) inst.is_set.NAME = !0
 
-#define INST_IS_SAVED(NAME) { \
-	if (!inst.is_set.inst) \
-		error_q(__FILE__, __LINE__, "error: This inst is not initialized yet\n"); \
-	else if (inst.is_saved.NAME) \
-		error_q(__FILE__, __LINE__, "error: %s is already saved\n", #NAME); \
-}
-
-#define INST_SAVED(NAME) inst.is_saved.NAME = !0
-
 %}
 
 %option noyywrap
 
 %%
 
-simm=`[^`\n\r]+`/{sep} alu_simm_rpn_save_or_expand(yytext + 5);
-simm=vr`[^`\n\r]+`/{sep} alu_vrsimm_rpn_save_or_expand(yytext + 7);
-imm=`[^`\n\r]+`/{sep} li_imm_rpn_save_or_expand(yytext + 4);
+simm=`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_SIMM, yytext + 5);
+simm=vr`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_VRSIMM, yytext + 7);
+imm=`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_IMM, yytext + 4);
 
 {space}+ ;
 
@@ -944,7 +939,7 @@ static void assemble_init()
 	program_number = 1;
 	inst_reset();
 	diskstorage_init(&ds_inst);
-	diskstorage_init(&ds_simm_imm_str);
+	diskstorage_init(&ds_imms_str);
 	diskstorage_init(&ds_label);
 	diskstorage_init(&ds_label_program_number);
 }
@@ -958,7 +953,7 @@ static void assemble_finalize()
 	if (n_inst != program_number - 1)
 		error_q(__FILE__, __LINE__, "error: n_inst(%d) and program_number-1(%d) differ\n", n_inst, program_number - 1);
 	n_label = diskstorage_n(&ds_label);
-	len_max_imm = diskstorage_len_max(&ds_simm_imm_str);
+	len_max_imm = diskstorage_len_max(&ds_imms_str);
 	len_max_label = diskstorage_len_max(&ds_label);
 	label = malloc((len_max_label + 1) * sizeof(char));
 	if (label == NULL)
@@ -971,15 +966,15 @@ static void assemble_finalize()
 		error_q(__FILE__, __LINE__, "error: Failed to allocate imm_saved\n");
 
 	diskstorage_seek(0, &ds_inst);
-	diskstorage_seek(0, &ds_simm_imm_str);
+	diskstorage_seek(0, &ds_imms_str);
 	for (i = 0; i < n_inst; i ++) {
 		program_number = i + 1;
 		diskstorage_read_next(&inst, sizeof(inst), &ds_inst);
-		if (inst.is_saved.simm || inst.is_saved.imm) {
+		if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE) {
 			int len;
 			char *token = NULL, *saveptr = NULL;
 
-			len = diskstorage_read_next(imm_saved, len_max_imm, &ds_simm_imm_str);
+			len = diskstorage_read_next(imm_saved, len_max_imm, &ds_imms_str);
 			imm_saved[len] = '\0';
 			imm_new[0] = '\0';
 
@@ -1020,10 +1015,20 @@ static void assemble_finalize()
 					error_q(__FILE__, __LINE__, "error: Label \"%s\" is not found\n", token);
 			} while ((token = strtok_r(NULL, " \t", &saveptr)) != NULL);
 
-			if (inst.is_saved.simm)
-				alu_simm(midimm_to_simm(rpn_to_midimm(imm_new, 0)));
-			else
-				li_imm(midimm_to_imm(rpn_to_midimm(imm_new, 0)));
+			switch (inst.saved_imm_type) {
+				case SAVED_IMM_TYPE_SIMM:
+					alu_simm(midimm_to_simm(rpn_to_midimm(imm_new, 0)));
+					break;
+				case SAVED_IMM_TYPE_VRSIMM:
+					alu_simm(midimm_to_simm_vr(rpn_to_midimm(imm_new, 0)));
+					break;
+				case SAVED_IMM_TYPE_IMM:
+					li_imm(midimm_to_imm(rpn_to_midimm(imm_new, 0)));
+					break;
+				case SAVED_IMM_TYPE_NONE:
+					error_q(__FILE__, __LINE__, "error: saved_imm_type is none\n");
+					break;
+			}
 		}
 		print_inst();
 	}
@@ -1033,7 +1038,7 @@ static void assemble_finalize()
 	free(label);
 	diskstorage_finalize(&ds_label_program_number);
 	diskstorage_finalize(&ds_label);
-	diskstorage_finalize(&ds_simm_imm_str);
+	diskstorage_finalize(&ds_imms_str);
 	diskstorage_finalize(&ds_inst);
 }
 
@@ -1573,6 +1578,74 @@ static inst_simm_t midimm_to_simm(midimm_t midimm)
 	return INST_SIMM_0; /* To avoid compiler warnings. Ugly. */
 }
 
+static inst_simm_t midimm_to_simm_vr(midimm_t midimm)
+{
+	int32_t val;
+
+	if (midimm.type == MIDIMM_TYPE_FLOAT)
+		error_q(__FILE__, __LINE__, "error: Cannot convert float to vr immediate\n");
+
+	val = midimm.ival;
+
+	if (val < 0)
+		val += -INT32_MIN;
+	val %= 16;
+
+	switch (val) {
+		case 0:
+			error_q(__FILE__, __LINE__, "error: Sorry but 0 is ambiguous for vector rotate\n");
+			break;
+		case 1:
+			return INST_SIMM_VR1;
+			break;
+		case 2:
+			return INST_SIMM_VR2;
+			break;
+		case 3:
+			return INST_SIMM_VR3;
+			break;
+		case 4:
+			return INST_SIMM_VR4;
+			break;
+		case 5:
+			return INST_SIMM_VR5;
+			break;
+		case 6:
+			return INST_SIMM_VR6;
+			break;
+		case 7:
+			return INST_SIMM_VR7;
+			break;
+		case 8:
+			return INST_SIMM_VR8;
+			break;
+		case 9:
+			return INST_SIMM_VR9;
+			break;
+		case 10:
+			return INST_SIMM_VR10;
+			break;
+		case 11:
+			return INST_SIMM_VR11;
+			break;
+		case 12:
+			return INST_SIMM_VR12;
+			break;
+		case 13:
+			return INST_SIMM_VR13;
+			break;
+		case 14:
+			return INST_SIMM_VR14;
+			break;
+		case 15:
+			return INST_SIMM_VR15;
+			break;
+	}
+
+	error_q(__FILE__, __LINE__, "error: Unreachable\n");
+	return INST_SIMM_0;
+}
+
 static inst_imm_t midimm_to_imm(midimm_t midimm)
 {
 	switch (midimm.type) {
@@ -1582,50 +1655,79 @@ static inst_imm_t midimm_to_imm(midimm_t midimm)
 			return midimm.fval;
 	}
 }
-static void alu_simm_rpn_save(const char *str)
-{
-	char *simm = NULL;
 
-	valid_inst_inst(__LINE__, 1, INST_ALU);
-	if (inst.sig != INST_SIG_SIMM)
-		error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
-	INST_IS_SAVED(simm);
-	simm = remove_surrounding_chars(str);
-	diskstorage_append(simm, strlen(simm), &ds_simm_imm_str);
-	free(simm);
-	INST_SAVED(simm);
+static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str)
+{
+	char *imms = NULL;
+
+	if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE)
+		error_q(__FILE__, __LINE__, "error: Immediate is already set\n");
+
+	switch (saved_imm_type) {
+		case SAVED_IMM_TYPE_SIMM:
+			valid_inst_inst(__LINE__, 1, INST_ALU);
+			if (inst.sig != INST_SIG_SIMM)
+				error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
+			break;
+
+		case SAVED_IMM_TYPE_VRSIMM:
+			valid_inst_inst(__LINE__, 1, INST_ALU);
+			if (inst.sig != INST_SIG_SIMM)
+				error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
+			break;
+
+		case SAVED_IMM_TYPE_IMM:
+			valid_inst_inst(__LINE__, 2, INST_BRA, INST_LI);
+			break;
+
+		case SAVED_IMM_TYPE_NONE:
+			error_q(__FILE__, __LINE__, "error: Specified saved imm type is none\n");
+			break;
+	}
+
+	imms = remove_surrounding_chars(str);
+	diskstorage_append(imms, strlen(imms), &ds_imms_str);
+	free(imms);
+	inst.saved_imm_type = saved_imm_type;
 }
 
-static void li_imm_rpn_save(const char *str)
+static void imms_rpn_save_or_expand(const saved_imm_type_t saved_imm_type, const char *str)
 {
-	char *imm = NULL;
+	midimm_t m;
+	_Bool does_involve_colon = (strchr(str, ':') != NULL);
 
-	valid_inst_inst(__LINE__, 2, INST_BRA, INST_LI);
-	INST_IS_SAVED(imm);
-	imm = remove_surrounding_chars(str);
-	diskstorage_append(imm, strlen(imm), &ds_simm_imm_str);
-	free(imm);
-	INST_SAVED(imm);
-}
+	if (!does_involve_colon)
+		m = rpn_to_midimm(str, 1);;
 
-static void alu_simm_rpn_save_or_expand(const char *str)
-{
-	valid_inst_inst(__LINE__, 1, INST_ALU);
-	if (inst.sig != INST_SIG_SIMM)
-		error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
-	if (strchr(str, ':') == NULL)
-		alu_simm(midimm_to_simm(rpn_to_midimm(str, 1)));
-	else
-		alu_simm_rpn_save(str);
-}
+	switch (saved_imm_type) {
+		case SAVED_IMM_TYPE_SIMM:
+			valid_inst_inst(__LINE__, 1, INST_ALU);
+			if (inst.sig != INST_SIG_SIMM)
+				error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
+			if (!does_involve_colon)
+				alu_simm(midimm_to_simm(m));
+			break;
 
-static void li_imm_rpn_save_or_expand(const char *str)
-{
-	valid_inst_inst(__LINE__, 2, INST_BRA, INST_LI);
-	if (strchr(str, ':') == NULL)
-		li_imm(midimm_to_imm(rpn_to_midimm(str, 1)));
-	else
-		li_imm_rpn_save(str);
+		case SAVED_IMM_TYPE_VRSIMM:
+			valid_inst_inst(__LINE__, 1, INST_ALU);
+			if (inst.sig != INST_SIG_SIMM)
+				error_q(__FILE__, __LINE__, "error: small immediates are only supported in alu sig=simm\n");
+			if (!does_involve_colon)
+				alu_simm(midimm_to_simm_vr(m));
+			break;
+
+		case SAVED_IMM_TYPE_IMM:
+			valid_inst_inst(__LINE__, 2, INST_BRA, INST_LI);
+			if (!does_involve_colon)
+				li_imm(midimm_to_imm(m));
+			break;
+
+		case SAVED_IMM_TYPE_NONE:
+			error_q(__FILE__, __LINE__, "error: Specified saved imm type is none\n");
+	}
+
+	if (does_involve_colon)
+		imms_rpn_save(saved_imm_type, str);
 }
 
 /* Removes [0] and [len - 1] and returns a free(3)'able pointer. */
