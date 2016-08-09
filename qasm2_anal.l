@@ -582,6 +582,8 @@ static void abort_assemble(const int line);
 %}
 
 %option noyywrap
+%option noinput
+%option nounput
 
 %%
 
