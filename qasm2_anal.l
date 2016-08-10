@@ -528,6 +528,7 @@ static void assemble_finalize();
 static void end_of_line(const _Bool is_comment_only_line);
 static void inst_init(inst_inst_t inst);
 static void inst_reset();
+static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label, const int n_label, const int len_max_label);
 static void inst_error();
 static void inst_warning();
 static void inst_subst_not_sets();
@@ -957,7 +958,7 @@ static void assemble_init()
 
 static void assemble_finalize()
 {
-	int i, j, n_inst, n_label, len_max_imm, len_max_label;
+	int i, n_inst, n_label, len_max_imm, len_max_label;
 	char *label = NULL, *imm_saved = NULL, *imm_new = NULL;
 
 	n_inst = diskstorage_n(&ds_inst);
@@ -988,63 +989,12 @@ static void assemble_finalize()
 		inst_subst_not_sets();
 		if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE) {
 			int len;
-			char *token = NULL, *saveptr = NULL;
 
 			len = diskstorage_read_next(imm_saved, len_max_imm, &ds_imms_str);
 			imm_saved[len] = '\0';
 			imm_new[0] = '\0';
 
-			token = strtok_r(imm_saved, " \t", &saveptr);
-			if (token == NULL)
-				error_q(__LINE__, "error: Empty label\n");
-			do {
-				_Bool is_matched = 0;
-
-				strcat(imm_new, " ");
-
-				if (token[0] != ':') {
-					strcat(imm_new, token);
-					continue;
-				}
-
-				/* Skip a ':'. */
-				token ++;
-
-				diskstorage_seek(0, &ds_label);
-				diskstorage_seek(0, &ds_label_program_number);
-				for (j = 0; j < n_label; j ++) {
-					int label_program_number;
-
-					len = diskstorage_read_next(label, len_max_label, &ds_label);
-					label[len] = '\0';
-					diskstorage_read_next(&label_program_number, sizeof(label_program_number), &ds_label_program_number);
-
-					if (!strcmp(token, label)) {
-						char buf[(10 + 1) + 1];
-						sprintf(buf, "%d", (label_program_number - (program_number + 4)) * (64 / 8));
-						strcat(imm_new, buf);
-						is_matched = !0;
-						break;
-					}
-				}
-				if (!is_matched)
-					error_q(__LINE__, "error: Label \"%s\" is not found\n", token);
-			} while ((token = strtok_r(NULL, " \t", &saveptr)) != NULL);
-
-			switch (inst.saved_imm_type) {
-				case SAVED_IMM_TYPE_SIMM:
-					alu_simm(midimm_to_simm(rpn_to_midimm(imm_new, 0)));
-					break;
-				case SAVED_IMM_TYPE_VRSIMM:
-					alu_simm(midimm_to_simm_vr(rpn_to_midimm(imm_new, 0)));
-					break;
-				case SAVED_IMM_TYPE_IMM:
-					li_imm(midimm_to_imm(rpn_to_midimm(imm_new, 0)));
-					break;
-				case SAVED_IMM_TYPE_NONE:
-					error_q(__LINE__, "error: saved_imm_type is none\n");
-					break;
-			}
+			inst_subst_label_in_imm(imm_new, imm_saved, label, n_label, len_max_label);
 		}
 		print_inst();
 	}
@@ -1146,6 +1096,66 @@ static void inst_init(inst_inst_t inst_inst)
 static void inst_reset()
 {
 	memset(&inst, 0, sizeof(inst));
+}
+
+
+static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label, const int n_label, const int len_max_label)
+{
+	int j;
+	char *token = NULL, *saveptr = NULL;
+
+	token = strtok_r(imm_saved, " \t", &saveptr);
+	if (token == NULL)
+		error_q(__LINE__, "error: Empty label\n");
+
+	do {
+		_Bool is_matched = 0;
+
+		strcat(imm_new, " ");
+
+		if (token[0] != ':') {
+			strcat(imm_new, token);
+			continue;
+		}
+
+		/* Skip a ':'. */
+		token ++;
+
+		diskstorage_seek(0, &ds_label);
+		diskstorage_seek(0, &ds_label_program_number);
+		for (j = 0; j < n_label; j ++) {
+			int len, label_program_number;
+
+			len = diskstorage_read_next(label, len_max_label, &ds_label);
+			label[len] = '\0';
+			diskstorage_read_next(&label_program_number, sizeof(label_program_number), &ds_label_program_number);
+
+			if (!strcmp(token, label)) {
+				char buf[(10 + 1) + 1];
+				sprintf(buf, "%d", (label_program_number - (program_number + 4)) * (64 / 8));
+				strcat(imm_new, buf);
+				is_matched = !0;
+				break;
+			}
+		}
+		if (!is_matched)
+			error_q(__LINE__, "error: Label \"%s\" is not found\n", token);
+	} while ((token = strtok_r(NULL, " \t", &saveptr)) != NULL);
+
+	switch (inst.saved_imm_type) {
+		case SAVED_IMM_TYPE_SIMM:
+			alu_simm(midimm_to_simm(rpn_to_midimm(imm_new, 0)));
+			break;
+		case SAVED_IMM_TYPE_VRSIMM:
+			alu_simm(midimm_to_simm_vr(rpn_to_midimm(imm_new, 0)));
+			break;
+		case SAVED_IMM_TYPE_IMM:
+			li_imm(midimm_to_imm(rpn_to_midimm(imm_new, 0)));
+			break;
+		case SAVED_IMM_TYPE_NONE:
+			error_q(__LINE__, "error: saved_imm_type is none\n");
+			break;
+	}
 }
 
 static void inst_error()
