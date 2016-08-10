@@ -264,7 +264,10 @@ typedef enum {
 
 	INST_RWADDR_ADDMULAB_TMU1R = 62,
 
-	INST_RWADDR_ADDMULAB_TMU1B = 63
+	INST_RWADDR_ADDMULAB_TMU1B = 63,
+
+	/* This is only for bra. */
+	INST_RWADDR_ADDMULAB_NOT_SET
 } inst_rwaddr_addmulab_t;
 
 typedef enum {
@@ -380,7 +383,8 @@ typedef enum {
 	INST_ADDMUL_AB_R4 = 4,
 	INST_ADDMUL_AB_R5 = 5,
 	INST_ADDMUL_AB_RA = 6,
-	INST_ADDMUL_AB_RB = 7
+	INST_ADDMUL_AB_RB = 7,
+	INST_ADDMUL_AB_NOT_SET
 } inst_addmul_ab_t;
 
 typedef enum {
@@ -524,6 +528,9 @@ static void assemble_finalize();
 static void end_of_line(const _Bool is_comment_only_line);
 static void inst_init(inst_inst_t inst);
 static void inst_reset();
+static void inst_error();
+static void inst_warning();
+static void inst_subst_not_sets();
 static void alu_sig(inst_sig_t sig);
 static void alu_unpack(inst_unpack_t inst_unpack);
 static void alu_pm(inst_pm_t inst_pm);
@@ -568,6 +575,7 @@ static void print_bin(const uint64_t u, unsigned int width, const _Bool to_print
 
 static void error_invalid_character(const char c);
 static void error_q(const int line, const char *format, ...);
+static void warning_q(const int line, const char *format, ...);
 static void abort_assemble(const int line);
 
 #define INST_IS_SET(NAME) { \
@@ -972,6 +980,9 @@ static void assemble_finalize()
 	for (i = 0; i < n_inst; i ++) {
 		program_number = i + 1;
 		diskstorage_read_next(&inst, sizeof(inst), &ds_inst);
+		inst_error();
+		inst_warning();
+		inst_subst_not_sets();
 		if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE) {
 			int len;
 			char *token = NULL, *saveptr = NULL;
@@ -1080,16 +1091,16 @@ static void inst_init(inst_inst_t inst_inst)
 			inst.raddr_b = INST_RWADDR_ADDMULAB_NOP;
 			inst.op_mul = INST_OP_MUL_NOP;
 			inst.op_add = INST_OP_ADD_NOP;
-			inst.add_a = INST_ADDMUL_AB_R0;
-			inst.add_b = INST_ADDMUL_AB_R0;
-			inst.mul_a = INST_ADDMUL_AB_R0;
-			inst.mul_b = INST_ADDMUL_AB_R0;
+			inst.add_a = INST_ADDMUL_AB_NOT_SET;
+			inst.add_b = INST_ADDMUL_AB_NOT_SET;
+			inst.mul_a = INST_ADDMUL_AB_NOT_SET;
+			inst.mul_b = INST_ADDMUL_AB_NOT_SET;
 			break;
 
 		case INST_BRA:
 			inst.rel = INST_REL_0;
 			inst.reg = INST_REG_0;
-			/* Notice: Not setting inst.raddr_a since it cannot be NOP. */
+			inst.raddr_a = INST_RWADDR_ADDMULAB_NOT_SET;
 			inst.ws = 0;
 			inst.waddr_add = INST_RWADDR_ADDMULAB_NOP;
 			inst.waddr_mul = INST_RWADDR_ADDMULAB_NOP;
@@ -1130,6 +1141,100 @@ static void inst_init(inst_inst_t inst_inst)
 static void inst_reset()
 {
 	memset(&inst, 0, sizeof(inst));
+}
+
+static void inst_error()
+{
+	switch (inst.inst) {
+		case INST_ALU:
+			if (
+				   (inst.waddr_add == INST_RWADDR_ADDMULAB_NOT_SET)
+				|| (inst.waddr_mul == INST_RWADDR_ADDMULAB_NOT_SET)
+				|| (inst.raddr_a == INST_RWADDR_ADDMULAB_NOT_SET)
+				|| (inst.raddr_b == INST_RWADDR_ADDMULAB_NOT_SET)
+			)
+				error_q(__LINE__, "error: INST_RWADDR_ADDMULAB_NOT_SET is used for alu\n");
+			break;
+
+		case INST_BRA:
+			break;
+
+		case INST_LI:
+			break;
+
+		case INST_SEM:
+			break;
+
+		default:
+			error_q(__LINE__, "error: Unknown inst.inst\n");
+	}
+}
+
+static void inst_warning()
+{
+	switch (inst.inst) {
+		case INST_ALU:
+			if (
+				   (inst.op_add != INST_OP_ADD_NOP)
+				&& (
+					   (inst.add_a == INST_ADDMUL_AB_NOT_SET)
+					|| (inst.add_b == INST_ADDMUL_AB_NOT_SET)
+				)
+			)
+				warning_q(__LINE__, "warning: op_add is non-nop but not both of add_a and add_b are set\n");
+
+			if (
+				   (inst.op_add == INST_OP_ADD_NOP)
+				&& (
+					   (inst.add_a != INST_ADDMUL_AB_NOT_SET)
+					|| (inst.add_b != INST_ADDMUL_AB_NOT_SET)
+				)
+			)
+				warning_q(__LINE__, "warning: op_add is nop but add_a and/or add_b is set\n");
+			break;
+
+		case INST_BRA:
+			break;
+
+		case INST_LI:
+			break;
+
+		case INST_SEM:
+			break;
+
+		default:
+			error_q(__LINE__, "error: Unknown inst.inst\n");
+	}
+}
+
+static void inst_subst_not_sets()
+{
+	switch (inst.inst) {
+		case INST_ALU:
+			if (inst.add_a == INST_ADDMUL_AB_NOT_SET)
+				inst.add_a = INST_ADDMUL_AB_R0;
+			if (inst.add_b == INST_ADDMUL_AB_NOT_SET)
+				inst.add_b = INST_ADDMUL_AB_R0;
+			if (inst.mul_a == INST_ADDMUL_AB_NOT_SET)
+				inst.mul_a = INST_ADDMUL_AB_R0;
+			if (inst.mul_b == INST_ADDMUL_AB_NOT_SET)
+				inst.mul_b = INST_ADDMUL_AB_R0;
+			break;
+
+		case INST_BRA:
+			if (inst.raddr_a == INST_RWADDR_ADDMULAB_NOT_SET)
+				inst.raddr_a = INST_RWADDR_ADDMULAB_RA0;
+			break;
+
+		case INST_LI:
+			break;
+
+		case INST_SEM:
+			break;
+
+		default:
+			error_q(__LINE__, "error: Unknown inst.inst\n");
+	}
 }
 
 static void alu_sig(inst_sig_t inst_sig)
@@ -1872,6 +1977,21 @@ static void error_q(const int line, const char *format, ...)
 	va_end(ap);
 
 	abort_assemble(line);
+}
+
+static void warning_q(const int line, const char *format, ...)
+{
+	va_list ap;
+	int reti;
+
+	reti = fprintf(stderr, "%s:%d: %d: ", __FILE__, line, line_number);
+	if (reti < 0)
+		abort_assemble(__LINE__);
+	va_start(ap, format);
+	reti = vfprintf(stderr, format, ap);
+	if (reti < 0)
+		abort_assemble(__LINE__);
+	va_end(ap);
 }
 
 static void abort_assemble(const int line)
