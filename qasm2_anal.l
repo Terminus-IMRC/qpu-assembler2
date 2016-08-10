@@ -603,11 +603,15 @@ imm=`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_IMM, yytext + 4);
 {space}+ ;
 
  /* A label line. */
-^{space}*:[^ \t\n\r]+{space}*{newline} {
-	const char *p = yytext;
-	while ((*p == ' ') || (*p == '\t'))
+^{space}*:[^ \t\n\r]+{space}*((;[^\r\n]*)?){newline} {
+	char *p = yytext, *label_start;
+	while ((*p == ' ') || (*p == '\t') || (*p == '\n') || (*p == '\r'))
 		p++;
-	bra_label_save(p + 1);
+	label_start = ++p;
+	while ((*p != ' ') && (*p != '\t') && (*p != '\n') && (*p != '\r'))
+		p++;
+	*p = '\0';
+	bra_label_save(label_start);
 	end_of_line(1);
 }
 
