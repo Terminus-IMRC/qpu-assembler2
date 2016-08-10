@@ -1196,7 +1196,7 @@ static void inst_warning()
 					|| (inst.add_b == INST_ADDMUL_AB_NOT_SET)
 				)
 			)
-				warning_q(__LINE__, "warning: op_add is non-nop but not both of add_a and add_b are set\n");
+				warning_q(__LINE__, "op_add is non-nop but not both of add_a and add_b are set\n");
 
 			if (
 				   (inst.op_add == INST_OP_ADD_NOP)
@@ -1205,7 +1205,7 @@ static void inst_warning()
 					|| (inst.add_b != INST_ADDMUL_AB_NOT_SET)
 				)
 			)
-				warning_q(__LINE__, "warning: op_add is nop but add_a and/or add_b is set\n");
+				warning_q(__LINE__, "op_add is nop but add_a and/or add_b is set\n");
 
 			if (
 				   (inst.op_mul != INST_OP_MUL_NOP)
@@ -1214,7 +1214,7 @@ static void inst_warning()
 					|| (inst.mul_b == INST_ADDMUL_AB_NOT_SET)
 				)
 			)
-				warning_q(__LINE__, "warning: op_mul is non-nop but not both of mul_a and mul_b are set\n");
+				warning_q(__LINE__, "op_mul is non-nop but not both of mul_a and mul_b are set\n");
 
 			if (
 				   (inst.op_mul == INST_OP_MUL_NOP)
@@ -1223,7 +1223,7 @@ static void inst_warning()
 					|| (inst.mul_b != INST_ADDMUL_AB_NOT_SET)
 				)
 			)
-				warning_q(__LINE__, "warning: op_mul is nop but mul_a and/or mul_b is set\n");
+				warning_q(__LINE__, "op_mul is nop but mul_a and/or mul_b is set\n");
 
 			if (
 				   (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP)
@@ -1234,7 +1234,7 @@ static void inst_warning()
 					|| (inst.mul_b == INST_ADDMUL_AB_RA)
 				)
 			)
-				warning_q(__LINE__, "warning: ra nop is reffered\n");
+				warning_q(__LINE__, "ra nop is reffered\n");
 
 			if (
 				   (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP)
@@ -1245,7 +1245,7 @@ static void inst_warning()
 					|| (inst.mul_b == INST_ADDMUL_AB_RB)
 				)
 			)
-				warning_q(__LINE__, "warning: rb nop is reffered\n");
+				warning_q(__LINE__, "rb nop is reffered\n");
 			break;
 
 		case INST_BRA:
@@ -2039,7 +2039,7 @@ static void warning_q(const int line, const char *format, ...)
 	va_list ap;
 	int reti;
 
-	reti = fprintf(stderr, "%s:%d: %d: ", __FILE__, line, line_number);
+	reti = fprintf(stderr, "%s:%d: %d: warning: ", __FILE__, line, line_number);
 	if (reti < 0)
 		abort_assemble(__LINE__);
 	va_start(ap, format);
