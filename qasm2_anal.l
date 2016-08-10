@@ -1206,6 +1206,46 @@ static void inst_warning()
 				)
 			)
 				warning_q(__LINE__, "warning: op_add is nop but add_a and/or add_b is set\n");
+
+			if (
+				   (inst.op_mul != INST_OP_MUL_NOP)
+				&& (
+					   (inst.mul_a == INST_ADDMUL_AB_NOT_SET)
+					|| (inst.mul_b == INST_ADDMUL_AB_NOT_SET)
+				)
+			)
+				warning_q(__LINE__, "warning: op_mul is non-nop but not both of mul_a and mul_b are set\n");
+
+			if (
+				   (inst.op_mul == INST_OP_MUL_NOP)
+				&& (
+					   (inst.mul_a != INST_ADDMUL_AB_NOT_SET)
+					|| (inst.mul_b != INST_ADDMUL_AB_NOT_SET)
+				)
+			)
+				warning_q(__LINE__, "warning: op_mul is nop but mul_a and/or mul_b is set\n");
+
+			if (
+				   (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP)
+				&& (
+					   (inst.add_a == INST_ADDMUL_AB_RA)
+					|| (inst.add_b == INST_ADDMUL_AB_RA)
+					|| (inst.mul_a == INST_ADDMUL_AB_RA)
+					|| (inst.mul_b == INST_ADDMUL_AB_RA)
+				)
+			)
+				warning_q(__LINE__, "warning: ra nop is reffered\n");
+
+			if (
+				   (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP)
+				&& (
+					   (inst.add_a == INST_ADDMUL_AB_RB)
+					|| (inst.add_b == INST_ADDMUL_AB_RB)
+					|| (inst.mul_a == INST_ADDMUL_AB_RB)
+					|| (inst.mul_b == INST_ADDMUL_AB_RB)
+				)
+			)
+				warning_q(__LINE__, "warning: rb nop is reffered\n");
 			break;
 
 		case INST_BRA:
