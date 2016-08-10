@@ -520,7 +520,7 @@ typedef enum {
 
 static int line_number, program_number;
 static inst_t inst;
-static diskstorage_t ds_inst, ds_imms_str, ds_label, ds_label_program_number;
+static diskstorage_t ds_inst, ds_line_number, ds_imms_str, ds_label, ds_label_program_number;
 static jmp_buf jenv;
 
 static void assemble_init();
@@ -949,6 +949,7 @@ static void assemble_init()
 	program_number = 1;
 	inst_reset();
 	diskstorage_init(&ds_inst);
+	diskstorage_init(&ds_line_number);
 	diskstorage_init(&ds_imms_str);
 	diskstorage_init(&ds_label);
 	diskstorage_init(&ds_label_program_number);
@@ -976,9 +977,11 @@ static void assemble_finalize()
 		error_q(__LINE__, "error: Failed to allocate imm_saved\n");
 
 	diskstorage_seek(0, &ds_inst);
+	diskstorage_seek(0, &ds_line_number);
 	diskstorage_seek(0, &ds_imms_str);
 	for (i = 0; i < n_inst; i ++) {
 		program_number = i + 1;
+		diskstorage_read_next(&line_number, sizeof(line_number), &ds_line_number);
 		diskstorage_read_next(&inst, sizeof(inst), &ds_inst);
 		inst_error();
 		inst_warning();
@@ -1052,6 +1055,7 @@ static void assemble_finalize()
 	diskstorage_finalize(&ds_label_program_number);
 	diskstorage_finalize(&ds_label);
 	diskstorage_finalize(&ds_imms_str);
+	diskstorage_finalize(&ds_line_number);
 	diskstorage_finalize(&ds_inst);
 }
 
@@ -1061,6 +1065,7 @@ static void end_of_line(const _Bool is_comment_only_line)
 		line_number ++;
 	} else {
 		diskstorage_append(&inst, sizeof(inst), &ds_inst);
+		diskstorage_append(&line_number, sizeof(line_number), &ds_line_number);
 		line_number ++;
 		program_number ++;
 	}
