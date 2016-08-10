@@ -581,9 +581,9 @@ static void abort_assemble(const int line);
 
 #define INST_IS_SET(NAME) { \
 	if (!inst.is_set.inst) \
-		error_q(__LINE__, "error: This inst is not initialized yet\n"); \
+		error_q(__LINE__, "This inst is not initialized yet\n"); \
 	else if (inst.is_set.NAME) \
-		error_q(__LINE__, "error: %s is already set\n", #NAME); \
+		error_q(__LINE__, "%s is already set\n", #NAME); \
 }
 
 #define INST_SET(NAME) inst.is_set.NAME = !0
@@ -963,19 +963,19 @@ static void assemble_finalize()
 
 	n_inst = diskstorage_n(&ds_inst);
 	if (n_inst != program_number - 1)
-		error_q(__LINE__, "error: n_inst(%d) and program_number-1(%d) differ\n", n_inst, program_number - 1);
+		error_q(__LINE__, "n_inst(%d) and program_number-1(%d) differ\n", n_inst, program_number - 1);
 	n_label = diskstorage_n(&ds_label);
 	len_max_imm = diskstorage_len_max(&ds_imms_str);
 	len_max_label = diskstorage_len_max(&ds_label);
 	label = malloc((len_max_label + 1) * sizeof(char));
 	if (label == NULL)
-		error_q(__LINE__, "error: Failed to allocate label\n");
+		error_q(__LINE__, "Failed to allocate label\n");
 	imm_saved = malloc((len_max_imm + 1) * sizeof(char));
 	if (imm_saved == NULL)
-		error_q(__LINE__, "error: Failed to allocate imm_saved\n");
+		error_q(__LINE__, "Failed to allocate imm_saved\n");
 	imm_new = malloc((len_max_imm + (10 - 2 + 1) + 1) * sizeof(char));
 	if (imm_new == NULL)
-		error_q(__LINE__, "error: Failed to allocate imm_saved\n");
+		error_q(__LINE__, "Failed to allocate imm_saved\n");
 
 	diskstorage_seek(0, &ds_inst);
 	diskstorage_seek(0, &ds_line_number);
@@ -1026,7 +1026,7 @@ static void inst_init(inst_inst_t inst_inst)
 {
 	/* Cannnot use INST_IS_SET here. */
 	if (inst.is_set.inst)
-		error_q(__LINE__, "error: inst is already set\n");
+		error_q(__LINE__, "inst is already set\n");
 
 	inst.inst = inst_inst;
 
@@ -1087,7 +1087,7 @@ static void inst_init(inst_inst_t inst_inst)
 			break;
 
 		default:
-			error_q(__LINE__, "error: Unknown inst_inst\n");
+			error_q(__LINE__, "Unknown inst_inst\n");
 	}
 
 	INST_SET(inst);
@@ -1106,7 +1106,7 @@ static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label,
 
 	token = strtok_r(imm_saved, " \t", &saveptr);
 	if (token == NULL)
-		error_q(__LINE__, "error: Empty label\n");
+		error_q(__LINE__, "Empty label\n");
 
 	do {
 		_Bool is_matched = 0;
@@ -1139,7 +1139,7 @@ static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label,
 			}
 		}
 		if (!is_matched)
-			error_q(__LINE__, "error: Label \"%s\" is not found\n", token);
+			error_q(__LINE__, "Label \"%s\" is not found\n", token);
 	} while ((token = strtok_r(NULL, " \t", &saveptr)) != NULL);
 
 	switch (inst.saved_imm_type) {
@@ -1153,7 +1153,7 @@ static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label,
 			li_imm(midimm_to_imm(rpn_to_midimm(imm_new, 0)));
 			break;
 		case SAVED_IMM_TYPE_NONE:
-			error_q(__LINE__, "error: saved_imm_type is none\n");
+			error_q(__LINE__, "saved_imm_type is none\n");
 			break;
 	}
 }
@@ -1168,7 +1168,7 @@ static void inst_error()
 				|| (inst.raddr_a == INST_RWADDR_ADDMULAB_NOT_SET)
 				|| (inst.raddr_b == INST_RWADDR_ADDMULAB_NOT_SET)
 			)
-				error_q(__LINE__, "error: INST_RWADDR_ADDMULAB_NOT_SET is used for alu\n");
+				error_q(__LINE__, "INST_RWADDR_ADDMULAB_NOT_SET is used for alu\n");
 			break;
 
 		case INST_BRA:
@@ -1181,7 +1181,7 @@ static void inst_error()
 			break;
 
 		default:
-			error_q(__LINE__, "error: Unknown inst.inst\n");
+			error_q(__LINE__, "Unknown inst.inst\n");
 	}
 }
 
@@ -1258,7 +1258,7 @@ static void inst_warning()
 			break;
 
 		default:
-			error_q(__LINE__, "error: Unknown inst.inst\n");
+			error_q(__LINE__, "Unknown inst.inst\n");
 	}
 }
 
@@ -1288,7 +1288,7 @@ static void inst_subst_not_sets()
 			break;
 
 		default:
-			error_q(__LINE__, "error: Unknown inst.inst\n");
+			error_q(__LINE__, "Unknown inst.inst\n");
 	}
 }
 
@@ -1379,7 +1379,7 @@ static void alu_rwaddr_addmulab(id_rwaddr_addmulab_t id_rwaddr_addmulab, inst_rw
 			valid_inst_inst(__LINE__, 2, INST_ALU, INST_BRA);
 			INST_IS_SET(raddr_a);
 			if ((inst.inst == INST_BRA) && (inst_rwaddr_addmulab > INST_RWADDR_ADDMULAB_RA31))
-				error_q(__LINE__, "error: raddr_a of bra only supports regfiles\n");
+				error_q(__LINE__, "raddr_a of bra only supports regfiles\n");
 			inst.raddr_a = inst_rwaddr_addmulab;
 			INST_SET(raddr_a);
 			break;
@@ -1397,7 +1397,7 @@ static void alu_simm(inst_simm_t inst_simm)
 {
 	valid_inst_inst(__LINE__, 1, INST_ALU);
 	if (inst.sig != INST_SIG_SIMM)
-		error_q(__LINE__, "error: small immediates are only supported in alu sig=simm\n");
+		error_q(__LINE__, "small immediates are only supported in alu sig=simm\n");
 	INST_IS_SET(simm);
 	inst.simm = inst_simm;
 	INST_SET(simm);
@@ -1513,7 +1513,7 @@ static id_cond_addmul_t str_to_id_cond_addmul(const char *str)
 	else if (!strncmp(str, "cond_mul", 8))
 		return ID_COND_ADDMUL_COND_MUL;
 	else {
-		error_q(__LINE__, "error: Invalid token for cond_addmul_t: %s\n", str);
+		error_q(__LINE__, "Invalid token for cond_addmul_t: %s\n", str);
 		return ID_COND_ADDMUL_COND_ADD; /* To avoid compiler warnings. Ugly. */
 	}
 }
@@ -1530,7 +1530,7 @@ static id_rwaddr_addmulab_t str_to_id_rwaddr_addmulab(const char *str)
 	else if (!strncmp(str, "raddr_b", 7))
 		return ID_RWADDR_ADDMULAB_RADDR_B;
 	else {
-		error_q(__LINE__, "error: Invalid token for rwaddr_addmul_t: %s\n", str);
+		error_q(__LINE__, "Invalid token for rwaddr_addmul_t: %s\n", str);
 		return ID_RWADDR_ADDMULAB_WADDR_ADD; /* To avoid compiler warnings. Ugly. */
 	}
 }
@@ -1547,7 +1547,7 @@ static id_addmul_ab_t str_to_id_addmul_ab(const char *str)
 	else if (!strncmp(str, "mul_b", 5))
 		return ID_ADDMUL_AB_MUL_B;
 	else {
-		error_q(__LINE__, "error: Invalid token for addmul_ab_t: %s\n", str);
+		error_q(__LINE__, "Invalid token for addmul_ab_t: %s\n", str);
 		return ID_ADDMUL_AB_ADD_A; /* To avoid compiler warnings. Ugly. */
 	}
 }
@@ -1559,7 +1559,7 @@ static void valid_inst_inst(const int line, const int n, ...)
 	_Bool is_matched = 0;
 
 	if (!inst.is_set.inst)
-		error_q(__LINE__, "error: inst.inst is not initialized yet\n");
+		error_q(__LINE__, "inst.inst is not initialized yet\n");
 
 	va_start(ap, n);
 	for (i = 0; i < n; i ++) {
@@ -1572,7 +1572,7 @@ static void valid_inst_inst(const int line, const int n, ...)
 	va_end(ap);
 
 	if (!is_matched)
-		error_q(line, "error: This modifier is not supported in this inst_inst\n");
+		error_q(line, "This modifier is not supported in this inst_inst\n");
 }
 
 static void bra_label_save(const char *str)
@@ -1586,7 +1586,7 @@ static void bra_label_save(const char *str)
 	max_len = diskstorage_len_max(&ds_label);
 	label = malloc((max_len + 1) * sizeof(char));
 	if (label == NULL)
-		error_q(__LINE__, "error: Failed to allocate label\n");
+		error_q(__LINE__, "Failed to allocate label\n");
 
 	n = diskstorage_n(&ds_label);
 	diskstorage_seek(0, &ds_label);
@@ -1595,7 +1595,7 @@ static void bra_label_save(const char *str)
 		len = diskstorage_read_next(label, max_len, &ds_label);
 		label[len] = '\0';
 		if (!strcmp(label_cur, label))
-			error_q(__LINE__, "error: Duplicated label: %s\n", label_cur);
+			error_q(__LINE__, "Duplicated label: %s\n", label_cur);
 	}
 
 	free(label);
@@ -1614,12 +1614,12 @@ static midimm_t rpn_to_midimm(const char *rpn_arg, const _Bool to_remove_surroun
 	else {
 		rpn = strdup(rpn_arg);
 		if (rpn == NULL)
-			error_q(__LINE__, "error: strdup: %s\n", strerror(errno));
+			error_q(__LINE__, "strdup: %s\n", strerror(errno));
 	}
 
 	midimm.type = MIDIMM_TYPE_INT;
 	if (rpn_calc_do(&(midimm.ival), rpn))
-		error_q(__LINE__, "error: On rpn_calc_do\n");
+		error_q(__LINE__, "On rpn_calc_do\n");
 
 	free(rpn);
 
@@ -1694,7 +1694,7 @@ static inst_simm_t midimm_to_simm(midimm_t midimm)
 				case -1:
 					return INST_SIMM_M1;
 				default:
-					error_q(__LINE__, "error: %" PRId32 " is not convertable to simm\n", midimm.ival);
+					error_q(__LINE__, "%" PRId32 " is not convertable to simm\n", midimm.ival);
 					break;
 			}
 			break;
@@ -1733,7 +1733,7 @@ static inst_simm_t midimm_to_simm(midimm_t midimm)
 			else if (midimm.fval == 1.0 / 2)
 				return INST_SIMM_1_2F;
 			else
-				error_q(__LINE__, "error: %f is not convertable to simm\n", midimm.fval);
+				error_q(__LINE__, "%f is not convertable to simm\n", midimm.fval);
 			break;
 	}
 
@@ -1745,7 +1745,7 @@ static inst_simm_t midimm_to_simm_vr(midimm_t midimm)
 	int32_t val;
 
 	if (midimm.type == MIDIMM_TYPE_FLOAT)
-		error_q(__LINE__, "error: Cannot convert float to vr immediate\n");
+		error_q(__LINE__, "Cannot convert float to vr immediate\n");
 
 	val = midimm.ival;
 
@@ -1755,7 +1755,7 @@ static inst_simm_t midimm_to_simm_vr(midimm_t midimm)
 
 	switch (val) {
 		case 0:
-			error_q(__LINE__, "error: Sorry but 0 is ambiguous for vector rotate\n");
+			error_q(__LINE__, "Sorry but 0 is ambiguous for vector rotate\n");
 			break;
 		case 1:
 			return INST_SIMM_VR1;
@@ -1804,7 +1804,7 @@ static inst_simm_t midimm_to_simm_vr(midimm_t midimm)
 			break;
 	}
 
-	error_q(__LINE__, "error: Unreachable\n");
+	error_q(__LINE__, "Unreachable\n");
 	return INST_SIMM_0;
 }
 
@@ -1823,19 +1823,19 @@ static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str
 	char *imms = NULL;
 
 	if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE)
-		error_q(__LINE__, "error: Immediate is already set\n");
+		error_q(__LINE__, "Immediate is already set\n");
 
 	switch (saved_imm_type) {
 		case SAVED_IMM_TYPE_SIMM:
 			valid_inst_inst(__LINE__, 1, INST_ALU);
 			if (inst.sig != INST_SIG_SIMM)
-				error_q(__LINE__, "error: small immediates are only supported in alu sig=simm\n");
+				error_q(__LINE__, "small immediates are only supported in alu sig=simm\n");
 			break;
 
 		case SAVED_IMM_TYPE_VRSIMM:
 			valid_inst_inst(__LINE__, 1, INST_ALU);
 			if (inst.sig != INST_SIG_SIMM)
-				error_q(__LINE__, "error: small immediates are only supported in alu sig=simm\n");
+				error_q(__LINE__, "small immediates are only supported in alu sig=simm\n");
 			break;
 
 		case SAVED_IMM_TYPE_IMM:
@@ -1843,7 +1843,7 @@ static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str
 			break;
 
 		case SAVED_IMM_TYPE_NONE:
-			error_q(__LINE__, "error: Specified saved imm type is none\n");
+			error_q(__LINE__, "Specified saved imm type is none\n");
 			break;
 	}
 
@@ -1865,7 +1865,7 @@ static void imms_rpn_save_or_expand(const saved_imm_type_t saved_imm_type, const
 		case SAVED_IMM_TYPE_SIMM:
 			valid_inst_inst(__LINE__, 1, INST_ALU);
 			if (inst.sig != INST_SIG_SIMM)
-				error_q(__LINE__, "error: small immediates are only supported in alu sig=simm\n");
+				error_q(__LINE__, "small immediates are only supported in alu sig=simm\n");
 			if (!does_involve_colon)
 				alu_simm(midimm_to_simm(m));
 			break;
@@ -1873,7 +1873,7 @@ static void imms_rpn_save_or_expand(const saved_imm_type_t saved_imm_type, const
 		case SAVED_IMM_TYPE_VRSIMM:
 			valid_inst_inst(__LINE__, 1, INST_ALU);
 			if (inst.sig != INST_SIG_SIMM)
-				error_q(__LINE__, "error: small immediates are only supported in alu sig=simm\n");
+				error_q(__LINE__, "small immediates are only supported in alu sig=simm\n");
 			if (!does_involve_colon)
 				alu_simm(midimm_to_simm_vr(m));
 			break;
@@ -1885,7 +1885,7 @@ static void imms_rpn_save_or_expand(const saved_imm_type_t saved_imm_type, const
 			break;
 
 		case SAVED_IMM_TYPE_NONE:
-			error_q(__LINE__, "error: Specified saved imm type is none\n");
+			error_q(__LINE__, "Specified saved imm type is none\n");
 	}
 
 	if (does_involve_colon)
@@ -1899,7 +1899,7 @@ static char* remove_surrounding_chars(const char *str)
 
 	retstr = strdup(str + 1);
 	if (retstr == NULL)
-		error_q(__LINE__, "error: strdup: %s\n", strerror(errno));
+		error_q(__LINE__, "strdup: %s\n", strerror(errno));
 	retstr[strlen(retstr) - 1] = '\0';
 
 	return retstr;
@@ -1912,7 +1912,7 @@ static char* remove_trailing_spaces_and_newlines(const char *str)
 
 	retstr = strdup(str);
 	if (retstr == NULL)
-		error_q(__LINE__, "error: strdup: %s\n", strerror(errno));
+		error_q(__LINE__, "strdup: %s\n", strerror(errno));
 
 	len = strlen(retstr);
 	if ((retstr[len - 2] == '\r') && (retstr[len - 1] == '\n')) {
@@ -1930,7 +1930,7 @@ static char* remove_trailing_spaces_and_newlines(const char *str)
 static void print_inst()
 {
 	if (!inst.is_set.inst)
-		error_q(__LINE__, "error: inst is not set yet\n");
+		error_q(__LINE__, "inst is not set yet\n");
 
 	switch (inst.inst) {
 		case INST_ALU:
@@ -2014,7 +2014,7 @@ static void print_bin(const uint64_t u, unsigned int width, const _Bool to_print
 
 static void error_invalid_character(const char c)
 {
-	error_q(__LINE__, "error: Invalid character: %c\n", c);
+	error_q(__LINE__, "Invalid character: %c\n", c);
 }
 
 static void error_q(const int line, const char *format, ...)
@@ -2022,7 +2022,7 @@ static void error_q(const int line, const char *format, ...)
 	va_list ap;
 	int reti;
 
-	reti = fprintf(stderr, "%s:%d: %d: ", __FILE__, line, line_number);
+	reti = fprintf(stderr, "%s:%d: %d: error: ", __FILE__, line, line_number);
 	if (reti < 0)
 		abort_assemble(__LINE__);
 	va_start(ap, format);
