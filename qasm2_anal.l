@@ -264,10 +264,7 @@ typedef enum {
 
 	INST_RWADDR_ADDMULAB_TMU1R = 62,
 
-	INST_RWADDR_ADDMULAB_TMU1B = 63,
-
-	/* This is only for bra. */
-	INST_RWADDR_ADDMULAB_NOT_SET
+	INST_RWADDR_ADDMULAB_TMU1B = 63
 } inst_rwaddr_addmulab_t;
 
 typedef enum {
@@ -383,8 +380,7 @@ typedef enum {
 	INST_ADDMUL_AB_R4 = 4,
 	INST_ADDMUL_AB_R5 = 5,
 	INST_ADDMUL_AB_RA = 6,
-	INST_ADDMUL_AB_RB = 7,
-	INST_ADDMUL_AB_NOT_SET
+	INST_ADDMUL_AB_RB = 7
 } inst_addmul_ab_t;
 
 typedef enum {
@@ -579,14 +575,16 @@ static void error_q(const int line, const char *format, ...);
 static void warning_q(const int line, const char *format, ...);
 static void abort_assemble(const int line);
 
-#define INST_IS_SET(NAME) { \
+#define INST_IS_SET(NAME) do { \
 	if (!inst.is_set.inst) \
 		error_q(__LINE__, "This inst is not initialized yet\n"); \
 	else if (inst.is_set.NAME) \
 		error_q(__LINE__, "%s is already set\n", #NAME); \
-}
+} while (0)
 
-#define INST_SET(NAME) inst.is_set.NAME = !0
+#define INST_SET(NAME) do { \
+	inst.is_set.NAME = !0; \
+} while (0)
 
 %}
 
@@ -990,7 +988,6 @@ static void assemble_finalize()
 		diskstorage_read_next(&inst, sizeof(inst), &ds_inst);
 		inst_error();
 		inst_warning();
-		inst_subst_not_sets();
 		if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE) {
 			int len;
 
@@ -1000,6 +997,7 @@ static void assemble_finalize()
 
 			inst_subst_label_in_imm(imm_new, imm_saved, label, n_label, len_max_label);
 		}
+		inst_subst_not_sets();
 		print_inst();
 	}
 
@@ -1034,66 +1032,6 @@ static void inst_init(inst_inst_t inst_inst)
 
 	inst.inst = inst_inst;
 
-	switch (inst_inst) {
-		case INST_ALU:
-			inst.sig = INST_SIG_NS;
-			inst.unpack = INST_UNPACK_3232;
-			inst.pm = 0;
-			inst.pack = INST_PACK_3232;
-			inst.cond_add = INST_COND_ADDMUL_NV;
-			inst.cond_mul = INST_COND_ADDMUL_NV;
-			inst.sf = INST_SF_0;
-			inst.ws = INST_WS_0;
-			inst.waddr_add = INST_RWADDR_ADDMULAB_NOP;
-			inst.waddr_mul = INST_RWADDR_ADDMULAB_NOP;
-			inst.raddr_a = INST_RWADDR_ADDMULAB_NOP;
-			inst.raddr_b = INST_RWADDR_ADDMULAB_NOP;
-			inst.op_mul = INST_OP_MUL_NOP;
-			inst.op_add = INST_OP_ADD_NOP;
-			inst.add_a = INST_ADDMUL_AB_NOT_SET;
-			inst.add_b = INST_ADDMUL_AB_NOT_SET;
-			inst.mul_a = INST_ADDMUL_AB_NOT_SET;
-			inst.mul_b = INST_ADDMUL_AB_NOT_SET;
-			break;
-
-		case INST_BRA:
-			inst.rel = INST_REL_0;
-			inst.reg = INST_REG_0;
-			inst.raddr_a = INST_RWADDR_ADDMULAB_NOT_SET;
-			inst.ws = 0;
-			inst.waddr_add = INST_RWADDR_ADDMULAB_NOP;
-			inst.waddr_mul = INST_RWADDR_ADDMULAB_NOP;
-			inst.imm = 0;
-			break;
-
-		case INST_LI:
-			inst.esig = INST_ESIG_32;
-			inst.pm = 0;
-			inst.pack = INST_PACK_3232;
-			inst.cond_add = INST_COND_ADDMUL_NV;
-			inst.cond_mul = INST_COND_ADDMUL_NV;
-			inst.sf = 0;
-			inst.ws = 0;
-			inst.waddr_add = INST_RWADDR_ADDMULAB_NOP;
-			inst.waddr_mul = INST_RWADDR_ADDMULAB_NOP;
-			inst.imm = 0;
-			break;
-
-		case INST_SEM:
-			inst.pm = 0;
-			inst.pack = INST_PACK_3232;
-			inst.cond_add = INST_COND_ADDMUL_NV;
-			inst.cond_mul = INST_COND_ADDMUL_NV;
-			inst.sf = 0;
-			inst.ws = 0;
-			inst.waddr_add = INST_RWADDR_ADDMULAB_NOP;
-			inst.waddr_mul = INST_RWADDR_ADDMULAB_NOP;
-			break;
-
-		default:
-			error_q(__LINE__, "Unknown inst_inst\n");
-	}
-
 	INST_SET(inst);
 }
 
@@ -1102,6 +1040,82 @@ static void inst_reset()
 	memset(&inst, 0, sizeof(inst));
 }
 
+static void inst_subst_not_sets()
+{
+	if (!inst.is_set.inst)
+		error_q(__LINE__, "inst is not set\n");
+
+	switch (inst.inst) {
+
+#define set_if_not_set(memb, val) do { \
+	if (!inst.is_set.memb) \
+		inst.memb = val; \
+	INST_SET(memb); \
+} while (0)
+
+		case INST_ALU:
+			set_if_not_set(sig, INST_SIG_SB);
+			set_if_not_set(unpack, INST_UNPACK_3232);
+			set_if_not_set(pm, INST_PM_0);
+			set_if_not_set(pack, INST_PACK_3232);
+			set_if_not_set(cond_add, INST_COND_ADDMUL_NV);
+			set_if_not_set(cond_mul, INST_COND_ADDMUL_NV);
+			set_if_not_set(sf, INST_SF_0);
+			set_if_not_set(ws, INST_WS_0);
+			set_if_not_set(waddr_add, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(waddr_mul, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(op_mul, INST_OP_MUL_NOP);
+			set_if_not_set(op_add, INST_OP_ADD_NOP);
+			set_if_not_set(raddr_a, INST_RWADDR_ADDMULAB_NOP);
+			/* Note: Not setting simm for INST_SIG_SIMM since it's not of kind to do this. */
+			if (inst.sig != INST_SIG_SIMM)
+				set_if_not_set(raddr_b, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(add_a, INST_ADDMUL_AB_R0);
+			set_if_not_set(add_b, INST_ADDMUL_AB_R0);
+			set_if_not_set(mul_a, INST_ADDMUL_AB_R0);
+			set_if_not_set(mul_b, INST_ADDMUL_AB_R0);
+			break;
+
+		case INST_BRA:
+			set_if_not_set(rel, INST_REL_0);
+			set_if_not_set(reg, INST_REG_0);
+			set_if_not_set(raddr_a, INST_RWADDR_ADDMULAB_RA0);
+			set_if_not_set(ws, INST_WS_0);
+			set_if_not_set(waddr_add, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(waddr_mul, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(imm, 0);
+			break;
+
+		case INST_LI:
+			set_if_not_set(esig, INST_ESIG_32);
+			set_if_not_set(pm, INST_PM_0);
+			set_if_not_set(pack, INST_PACK_3232);
+			set_if_not_set(cond_add, INST_COND_ADDMUL_NV);
+			set_if_not_set(cond_mul, INST_COND_ADDMUL_NV);
+			set_if_not_set(sf, INST_SF_0);
+			set_if_not_set(ws, INST_WS_0);
+			set_if_not_set(waddr_add, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(waddr_mul, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(imm, 0);
+			break;
+
+		case INST_SEM:
+			set_if_not_set(pm, INST_PM_0);
+			set_if_not_set(pack, INST_PACK_3232);
+			set_if_not_set(cond_add, INST_COND_ADDMUL_NV);
+			set_if_not_set(cond_mul, INST_COND_ADDMUL_NV);
+			set_if_not_set(sf, INST_SF_0);
+			set_if_not_set(ws, INST_WS_0);
+			set_if_not_set(waddr_add, INST_RWADDR_ADDMULAB_NOP);
+			set_if_not_set(waddr_mul, INST_RWADDR_ADDMULAB_NOP);
+			break;
+
+#undef set_if_not_set
+
+		default:
+			error_q(__LINE__, "Unknown inst.inst\n");
+	}
+}
 
 static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label, const int n_label, const int len_max_label)
 {
@@ -1164,15 +1178,11 @@ static void inst_subst_label_in_imm(char *imm_new, char *imm_saved, char *label,
 
 static void inst_error()
 {
+	if (!inst.is_set.inst)
+		error_q(__LINE__, "inst is not set\n");
+
 	switch (inst.inst) {
 		case INST_ALU:
-			if (
-				   (inst.waddr_add == INST_RWADDR_ADDMULAB_NOT_SET)
-				|| (inst.waddr_mul == INST_RWADDR_ADDMULAB_NOT_SET)
-				|| (inst.raddr_a == INST_RWADDR_ADDMULAB_NOT_SET)
-				|| (inst.raddr_b == INST_RWADDR_ADDMULAB_NOT_SET)
-			)
-				error_q(__LINE__, "INST_RWADDR_ADDMULAB_NOT_SET is used for alu\n");
 			break;
 
 		case INST_BRA:
@@ -1191,98 +1201,71 @@ static void inst_error()
 
 static void inst_warning()
 {
+	if (!inst.is_set.inst)
+		error_q(__LINE__, "inst is not set\n");
+
 	switch (inst.inst) {
 		case INST_ALU:
 			if (
-				   (inst.op_add != INST_OP_ADD_NOP)
+				   ((inst.is_set.op_add) && (inst.op_add != INST_OP_ADD_NOP))
 				&& (
-					   (inst.add_a == INST_ADDMUL_AB_NOT_SET)
-					|| (inst.add_b == INST_ADDMUL_AB_NOT_SET)
+					   (!inst.is_set.add_a)
+					|| (!inst.is_set.add_b)
 				)
 			)
 				warning_q(__LINE__, "op_add is non-nop but not both of add_a and add_b are set\n");
 
 			if (
-				   (inst.op_add == INST_OP_ADD_NOP)
+				   ((inst.is_set.op_add) && (inst.op_add == INST_OP_ADD_NOP))
 				&& (
-					   (inst.add_a != INST_ADDMUL_AB_NOT_SET)
-					|| (inst.add_b != INST_ADDMUL_AB_NOT_SET)
+					   (inst.is_set.add_a)
+					|| (inst.is_set.add_b)
 				)
 			)
 				warning_q(__LINE__, "op_add is nop but add_a and/or add_b is set\n");
 
 			if (
-				   (inst.op_mul != INST_OP_MUL_NOP)
+				   ((inst.is_set.op_mul) && (inst.op_mul != INST_OP_MUL_NOP))
 				&& (
-					   (inst.mul_a == INST_ADDMUL_AB_NOT_SET)
-					|| (inst.mul_b == INST_ADDMUL_AB_NOT_SET)
+					   (!inst.is_set.mul_a)
+					|| (!inst.is_set.mul_b)
 				)
 			)
 				warning_q(__LINE__, "op_mul is non-nop but not both of mul_a and mul_b are set\n");
 
 			if (
-				   (inst.op_mul == INST_OP_MUL_NOP)
+				   ((inst.is_set.op_mul) && (inst.op_mul == INST_OP_MUL_NOP))
 				&& (
-					   (inst.mul_a != INST_ADDMUL_AB_NOT_SET)
-					|| (inst.mul_b != INST_ADDMUL_AB_NOT_SET)
+					   (inst.is_set.mul_a)
+					|| (inst.is_set.mul_b)
 				)
 			)
 				warning_q(__LINE__, "op_mul is nop but mul_a and/or mul_b is set\n");
 
 			if (
-				   (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP)
+				   ((inst.is_set.raddr_a) && (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP))
 				&& (
-					   (inst.add_a == INST_ADDMUL_AB_RA)
-					|| (inst.add_b == INST_ADDMUL_AB_RA)
-					|| (inst.mul_a == INST_ADDMUL_AB_RA)
-					|| (inst.mul_b == INST_ADDMUL_AB_RA)
+					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RA))
+					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RA))
+					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RA))
+					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RA))
 				)
 			)
 				warning_q(__LINE__, "ra nop is reffered\n");
 
 			if (
-				   (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP)
+				   ((inst.is_set.raddr_b) && (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP))
 				&& (
-					   (inst.add_a == INST_ADDMUL_AB_RB)
-					|| (inst.add_b == INST_ADDMUL_AB_RB)
-					|| (inst.mul_a == INST_ADDMUL_AB_RB)
-					|| (inst.mul_b == INST_ADDMUL_AB_RB)
+					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RB))
+					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RB))
+					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
+					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
 				)
 			)
 				warning_q(__LINE__, "rb nop is reffered\n");
 			break;
 
 		case INST_BRA:
-			break;
-
-		case INST_LI:
-			break;
-
-		case INST_SEM:
-			break;
-
-		default:
-			error_q(__LINE__, "Unknown inst.inst\n");
-	}
-}
-
-static void inst_subst_not_sets()
-{
-	switch (inst.inst) {
-		case INST_ALU:
-			if (inst.add_a == INST_ADDMUL_AB_NOT_SET)
-				inst.add_a = INST_ADDMUL_AB_R0;
-			if (inst.add_b == INST_ADDMUL_AB_NOT_SET)
-				inst.add_b = INST_ADDMUL_AB_R0;
-			if (inst.mul_a == INST_ADDMUL_AB_NOT_SET)
-				inst.mul_a = INST_ADDMUL_AB_R0;
-			if (inst.mul_b == INST_ADDMUL_AB_NOT_SET)
-				inst.mul_b = INST_ADDMUL_AB_R0;
-			break;
-
-		case INST_BRA:
-			if (inst.raddr_a == INST_RWADDR_ADDMULAB_NOT_SET)
-				inst.raddr_a = INST_RWADDR_ADDMULAB_RA0;
 			break;
 
 		case INST_LI:
@@ -1937,71 +1920,81 @@ static void print_inst()
 		error_q(__LINE__, "inst is not set yet\n");
 
 	switch (inst.inst) {
+
+#define print_bin_if_set(memb, width, to_print_space) do { \
+	if (!inst.is_set.memb) \
+		error_q(__LINE__, #memb " is not set\n"); \
+	print_bin(inst.memb, width, to_print_space); \
+} while (0)
+
 		case INST_ALU:
-			print_bin(inst.sig, 4, 1);
-			print_bin(inst.unpack, 3, 1);
-			print_bin(inst.pm, 1, 1);
-			print_bin(inst.pack, 4, 1);
-			print_bin(inst.cond_add, 3, 1);
-			print_bin(inst.cond_mul, 3, 1);
-			print_bin(inst.sf, 1, 1);
-			print_bin(inst.ws, 1, 1);
-			print_bin(inst.waddr_add, 6, 1);
-			print_bin(inst.waddr_mul, 6, 1);
-			print_bin(inst.op_mul, 3, 1);
-			print_bin(inst.op_add, 5, 1);
-			print_bin(inst.raddr_a, 6, 1);
+			print_bin_if_set(sig, 4, 1);
+			print_bin_if_set(unpack, 3, 1);
+			print_bin_if_set(pm, 1, 1);
+			print_bin_if_set(pack, 4, 1);
+			print_bin_if_set(cond_add, 3, 1);
+			print_bin_if_set(cond_mul, 3, 1);
+			print_bin_if_set(sf, 1, 1);
+			print_bin_if_set(ws, 1, 1);
+			print_bin_if_set(waddr_add, 6, 1);
+			print_bin_if_set(waddr_mul, 6, 1);
+			print_bin_if_set(op_mul, 3, 1);
+			print_bin_if_set(op_add, 5, 1);
+			print_bin_if_set(raddr_a, 6, 1);
 			if (inst.sig == INST_SIG_SIMM)
-				print_bin(inst.simm, 6, 1);
+				print_bin_if_set(simm, 6, 1);
 			else
-				print_bin(inst.raddr_b, 6, 1);
-			print_bin(inst.add_a, 3, 1);
-			print_bin(inst.add_b, 3, 1);
-			print_bin(inst.mul_a, 3, 1);
-			print_bin(inst.mul_b, 3, 0);
+				print_bin_if_set(raddr_b, 6, 1);
+			print_bin_if_set(add_a, 3, 1);
+			print_bin_if_set(add_b, 3, 1);
+			print_bin_if_set(mul_a, 3, 1);
+			print_bin_if_set(mul_b, 3, 0);
 			break;
 
 		case INST_BRA:
 			print_bin(0xf, 4, 1);
 			print_bin(0, 4, 1); /* Don't care? */
-			print_bin(inst.cond_br, 4, 1);
-			print_bin(inst.rel, 1, 1);
-			print_bin(inst.reg, 1, 1);
-			print_bin(inst.raddr_a, 5, 1);
-			print_bin(inst.ws, 1, 1);
-			print_bin(inst.waddr_add, 6, 1);
-			print_bin(inst.waddr_mul, 6, 1);
-			print_bin(inst.imm, 32, 0);
+			print_bin_if_set(cond_br, 4, 1);
+			print_bin_if_set(rel, 1, 1);
+			print_bin_if_set(reg, 1, 1);
+			print_bin_if_set(raddr_a, 5, 1);
+			print_bin_if_set(ws, 1, 1);
+			print_bin_if_set(waddr_add, 6, 1);
+			print_bin_if_set(waddr_mul, 6, 1);
+			print_bin_if_set(imm, 32, 0);
 			break;
 
 		case INST_LI:
 			print_bin(0xe, 4, 1);
-			print_bin(inst.esig, 3, 1);
-			print_bin(inst.pm, 1, 1);
-			print_bin(inst.pack, 4, 1);
-			print_bin(inst.cond_add, 3, 1);
-			print_bin(inst.cond_mul, 3, 1);
-			print_bin(inst.sf, 1, 1);
-			print_bin(inst.ws, 1, 1);
-			print_bin(inst.waddr_add, 6, 1);
-			print_bin(inst.waddr_mul, 6, 1);
-			print_bin(inst.imm, 32, 0);
+			print_bin_if_set(esig, 3, 1);
+			print_bin_if_set(pm, 1, 1);
+			print_bin_if_set(pack, 4, 1);
+			print_bin_if_set(cond_add, 3, 1);
+			print_bin_if_set(cond_mul, 3, 1);
+			print_bin_if_set(sf, 1, 1);
+			print_bin_if_set(ws, 1, 1);
+			print_bin_if_set(waddr_add, 6, 1);
+			print_bin_if_set(waddr_mul, 6, 1);
+			print_bin_if_set(imm, 32, 0);
 			break;
 
 		case INST_SEM:
 			print_bin(0x74, 7, 1);
-			print_bin(inst.pm, 1, 1);
-			print_bin(inst.pack, 4, 1);
-			print_bin(inst.cond_add, 3, 1);
-			print_bin(inst.cond_mul, 3, 1);
-			print_bin(inst.sf, 1, 1);
-			print_bin(inst.ws, 1, 1);
-			print_bin(inst.waddr_add, 6, 1);
-			print_bin(inst.waddr_mul, 6, 1);
+			print_bin_if_set(pm, 1, 1);
+			print_bin_if_set(pack, 4, 1);
+			print_bin_if_set(cond_add, 3, 1);
+			print_bin_if_set(cond_mul, 3, 1);
+			print_bin_if_set(sf, 1, 1);
+			print_bin_if_set(ws, 1, 1);
+			print_bin_if_set(waddr_add, 6, 1);
+			print_bin_if_set(waddr_mul, 6, 1);
 			print_bin(0, 27, 1);
-			print_bin(inst.sa, 1, 1);
-			print_bin(inst.sem, 4, 0);
+			print_bin_if_set(sa, 1, 1);
+			print_bin_if_set(sem, 4, 0);
 			break;
+
+#undef print_bin_if_set
+
 	}
 	putchar('\n');
 }
