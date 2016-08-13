@@ -127,6 +127,7 @@ typedef enum {
 } id_reg_rwab_t;
 
 #define ID_REG_RWAB_EXT(u) ((((u)) & ID_REG_RWAB_RWAB))
+#define ID_REG_RWAB_NUM(u) ((((u)) & ~ID_REG_RWAB_RWAB))
 
 #define ID_REG_RWAB_AFFORD(reg, u) (( \
 	   (ID_REG_RWAB_EXT(reg) & (((u)) & ID_REG_RWAB_RW)) \
@@ -1170,6 +1171,10 @@ static void inst_error()
 
 static void inst_warning()
 {
+	static _Bool is_the_first_inst = 1;
+	static inst_rwaddr_addmulab_t prev_ra_written = INST_RWADDR_ADDMULAB_NOP;
+	static inst_rwaddr_addmulab_t prev_rb_written = INST_RWADDR_ADDMULAB_NOP;
+
 	if (!inst.is_set.inst)
 		error_q(__LINE__, "inst is not set\n");
 
@@ -1314,6 +1319,33 @@ static void inst_warning()
 
 	if ((inst.is_set.raddr_b) && !(ID_REG_RWAB_AFFORD(inst.raddr_b, ID_REG_RWAB_RB)))
 		warning_q(__LINE__, "raddr_b cannot read from ra\n");
+
+	if ((prev_ra_written != INST_RWADDR_ADDMULAB_NOP) && (inst.is_set.raddr_a) && (inst.raddr_a == prev_ra_written))
+		warning_q(__LINE__, "Reading from ra which is written by the previous instruction\n");
+
+	if ((prev_rb_written != INST_RWADDR_ADDMULAB_NOP) && (inst.is_set.raddr_b) && (inst.raddr_b == prev_rb_written))
+		warning_q(__LINE__, "Reading from rb which is written by the previous instruction\n");
+
+#define COND_REGFILE(waddr) ((( \
+	(inst.is_set.waddr) \
+	&& (ID_REG_RWAB_NUM(inst.waddr) >= ID_REG_RWAB_NUM(INST_RWADDR_ADDMULAB_RA0)) \
+	&& (ID_REG_RWAB_NUM(inst.waddr) <= ID_REG_RWAB_NUM(INST_RWADDR_ADDMULAB_RB31)) \
+)))
+	if (!is_the_first_inst) {
+		if (
+			   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
+			|| (!inst.is_set.ws)
+		) {
+			prev_ra_written = (COND_REGFILE(waddr_add) ? inst.waddr_add : INST_RWADDR_ADDMULAB_NOP);
+			prev_rb_written = (COND_REGFILE(waddr_mul) ? inst.waddr_mul : INST_RWADDR_ADDMULAB_NOP);
+		} else if ((inst.is_set.ws) && (inst.ws == INST_WS_1)) {
+			prev_ra_written = (COND_REGFILE(waddr_mul) ? inst.waddr_mul : INST_RWADDR_ADDMULAB_NOP);
+			prev_rb_written = (COND_REGFILE(waddr_add) ? inst.waddr_add : INST_RWADDR_ADDMULAB_NOP);
+		} else
+			error_q(__LINE__, "wtf\n");
+	}
+	is_the_first_inst = 0;
+#undef COND_REGFILE
 }
 
 static void alu_sig(inst_sig_t inst_sig)
