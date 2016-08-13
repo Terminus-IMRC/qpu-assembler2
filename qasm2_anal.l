@@ -1807,7 +1807,9 @@ static inst_simm_t midimm_to_simm_vr(midimm_t midimm)
 	val = midimm.ival;
 
 	if (val < 0)
-		val += -INT32_MIN;
+		val += -(INT32_MIN + 16);
+	if (val < 0)
+		val += 16;
 	val %= 16;
 
 	switch (val) {
