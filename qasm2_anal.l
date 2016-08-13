@@ -1173,164 +1173,147 @@ static void inst_warning()
 	if (!inst.is_set.inst)
 		error_q(__LINE__, "inst is not set\n");
 
-	switch (inst.inst) {
-		case INST_ALU:
-			if (
-				   ((inst.is_set.op_add) && (inst.op_add != INST_OP_ADD_NOP))
-				&& (
-					   (!inst.is_set.add_a)
-					|| (!inst.is_set.add_b)
-				)
-			)
-				warning_q(__LINE__, "op_add is non-nop but not both of add_a and add_b are set\n");
+	if (
+		   ((inst.is_set.op_add) && (inst.op_add != INST_OP_ADD_NOP))
+		&& (
+			   (!inst.is_set.add_a)
+			|| (!inst.is_set.add_b)
+		)
+	)
+		warning_q(__LINE__, "op_add is non-nop but not both of add_a and add_b are set\n");
 
-			if (
-				   ((inst.is_set.op_mul) && (inst.op_mul != INST_OP_MUL_NOP))
-				&& (
-					   (!inst.is_set.mul_a)
-					|| (!inst.is_set.mul_b)
-				)
-			)
-				warning_q(__LINE__, "op_mul is non-nop but not both of mul_a and mul_b are set\n");
+	if (
+		   ((inst.is_set.op_mul) && (inst.op_mul != INST_OP_MUL_NOP))
+		&& (
+			   (!inst.is_set.mul_a)
+			|| (!inst.is_set.mul_b)
+		)
+	)
+		warning_q(__LINE__, "op_mul is non-nop but not both of mul_a and mul_b are set\n");
 
-			if (
-				   ((inst.is_set.op_add) && (inst.op_add == INST_OP_ADD_NOP))
-				&& (
-					   (inst.is_set.add_a)
-					|| (inst.is_set.add_b)
-				)
-			)
-				warning_q(__LINE__, "op_add is nop but add_a and/or add_b is set\n");
+	if (
+		   ((inst.is_set.op_add) && (inst.op_add == INST_OP_ADD_NOP))
+		&& (
+			   (inst.is_set.add_a)
+			|| (inst.is_set.add_b)
+		)
+	)
+		warning_q(__LINE__, "op_add is nop but add_a and/or add_b is set\n");
 
-			if (
-				   ((inst.is_set.op_mul) && (inst.op_mul == INST_OP_MUL_NOP))
-				&& (
-					   (inst.is_set.mul_a)
-					|| (inst.is_set.mul_b)
-				)
-			)
-				warning_q(__LINE__, "op_mul is nop but mul_a and/or mul_b is set\n");
+	if (
+		   ((inst.is_set.op_mul) && (inst.op_mul == INST_OP_MUL_NOP))
+		&& (
+			   (inst.is_set.mul_a)
+			|| (inst.is_set.mul_b)
+		)
+	)
+		warning_q(__LINE__, "op_mul is nop but mul_a and/or mul_b is set\n");
 
-			if (
-				   ((inst.is_set.op_add) && (inst.op_add != INST_OP_ADD_NOP))
-				&& (
-					   (!inst.is_set.cond_add)
-					|| ((inst.is_set.cond_add) && (inst.cond_add == INST_COND_ADDMUL_NV))
-				)
-			)
-				warning_q(__LINE__, "op_add is set but cond_add is not set or nv\n");
+	if (
+		   ((inst.is_set.op_add) && (inst.op_add != INST_OP_ADD_NOP))
+		&& (
+			   (!inst.is_set.cond_add)
+			|| ((inst.is_set.cond_add) && (inst.cond_add == INST_COND_ADDMUL_NV))
+		)
+	)
+		warning_q(__LINE__, "op_add is set but cond_add is not set or nv\n");
 
-			if (
-				   ((inst.is_set.op_mul) && (inst.op_mul != INST_OP_MUL_NOP))
-				&& (
-					   (!inst.is_set.cond_mul)
-					|| ((inst.is_set.cond_mul) && (inst.cond_mul == INST_COND_ADDMUL_NV))
-				)
-			)
-				warning_q(__LINE__, "op_mul is set but cond_mul is not set or nv\n");
+	if (
+		   ((inst.is_set.op_mul) && (inst.op_mul != INST_OP_MUL_NOP))
+		&& (
+			   (!inst.is_set.cond_mul)
+			|| ((inst.is_set.cond_mul) && (inst.cond_mul == INST_COND_ADDMUL_NV))
+		)
+	)
+		warning_q(__LINE__, "op_mul is set but cond_mul is not set or nv\n");
 
-			if (
-				   ((inst.is_set.raddr_a) && (inst.raddr_a != INST_RWADDR_ADDMULAB_NOP))
-				&& !(
-					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RA))
-				)
-			)
-				warning_q(__LINE__, "raddr_a is not nop but is not referred\n");
+	if (
+		   ((inst.is_set.raddr_a) && (inst.raddr_a != INST_RWADDR_ADDMULAB_NOP))
+		&& !(
+			   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RA))
+		)
+	)
+		warning_q(__LINE__, "raddr_a is not nop but is not referred\n");
 
-			if (
-				(
-					   ((inst.is_set.sig) && (inst.sig != INST_SIG_SIMM) && (inst.is_set.raddr_b) && (inst.raddr_b != INST_RWADDR_ADDMULAB_NOP))
-					|| ((inst.is_set.sig) && (inst.sig == INST_SIG_SIMM) && (inst.is_set.simm))
-					|| ((!inst.is_set.sig) && (inst.is_set.raddr_b) && (inst.raddr_b != INST_RWADDR_ADDMULAB_NOP))
-				)
-				&& !(
-					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
-				)
-			)
-				warning_q(__LINE__, "raddr_b is not nop or simm is set but is not referred\n");
+	if (
+		   (
+			   ((inst.is_set.sig) && (inst.sig != INST_SIG_SIMM) && (inst.is_set.raddr_b) && (inst.raddr_b != INST_RWADDR_ADDMULAB_NOP))
+			|| ((inst.is_set.sig) && (inst.sig == INST_SIG_SIMM) && (inst.is_set.simm))
+			|| ((!inst.is_set.sig) && (inst.is_set.raddr_b) && (inst.raddr_b != INST_RWADDR_ADDMULAB_NOP))
+		)
+		&& !(
+			   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
+		)
+	)
+		warning_q(__LINE__, "raddr_b is not nop or simm is set but is not referred\n");
 
-			if (
-				   ((inst.is_set.raddr_a) && (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP))
-				&& (
-					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RA))
-					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RA))
-				)
-			)
-				warning_q(__LINE__, "ra nop is reffered\n");
+	if (
+		   ((inst.is_set.raddr_a) && (inst.raddr_a == INST_RWADDR_ADDMULAB_NOP))
+		&& (
+			   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RA))
+			|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RA))
+		)
+	)
+		warning_q(__LINE__, "ra nop is reffered\n");
 
-			if (
-				   ((inst.is_set.raddr_b) && (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP))
-				&& (
-					   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
-					|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
-				)
-			)
-				warning_q(__LINE__, "rb nop is reffered\n");
+	if (
+		   ((inst.is_set.raddr_b) && (inst.raddr_b == INST_RWADDR_ADDMULAB_NOP))
+		&& (
+			   ((inst.is_set.add_a) && (inst.add_a == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.add_b) && (inst.add_b == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
+			|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
+		)
+	)
+		warning_q(__LINE__, "rb nop is reffered\n");
 
-			if (
-				   (inst.is_set.waddr_add)
-				&& (
-					   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
-					|| (!inst.is_set.ws)
-				)
-				&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WA)))
-			)
-				warning_q(__LINE__, "waddr_add with ws=0 cannot write to rb\n");
+	if (
+		   (inst.is_set.waddr_add)
+		&& (
+			   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
+			|| (!inst.is_set.ws)
+		)
+		&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WA)))
+	)
+		warning_q(__LINE__, "waddr_add with ws=0 cannot write to rb\n");
 
-			if (
-				   (inst.is_set.waddr_add)
-				&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
-				&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WB)))
-			)
-				warning_q(__LINE__, "waddr_add with ws=1 cannot write to ra\n");
+	if (
+		   (inst.is_set.waddr_add)
+		&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
+		&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WB)))
+	)
+		warning_q(__LINE__, "waddr_add with ws=1 cannot write to ra\n");
 
-			if (
-				   (inst.is_set.waddr_mul)
-				&& (
-					   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
-					|| (!inst.is_set.ws)
-				)
-				&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WB)))
-			)
-				warning_q(__LINE__, "waddr_mul with ws=0 cannot write to ra\n");
+	if (
+		   (inst.is_set.waddr_mul)
+		&& (
+			   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
+			|| (!inst.is_set.ws)
+		)
+		&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WB)))
+	)
+		warning_q(__LINE__, "waddr_mul with ws=0 cannot write to ra\n");
 
-			if (
-				   (inst.is_set.waddr_mul)
-				&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
-				&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WA)))
-			)
-				warning_q(__LINE__, "waddr_mul with ws=1 cannot write to rb\n");
+	if (
+		   (inst.is_set.waddr_mul)
+		&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
+		&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WA)))
+	)
+		warning_q(__LINE__, "waddr_mul with ws=1 cannot write to rb\n");
 
-			if ((inst.is_set.raddr_a) && !(ID_REG_RWAB_AFFORD(inst.raddr_a, ID_REG_RWAB_RA)))
-				warning_q(__LINE__, "raddr_a cannot read from rb\n");
+	if ((inst.is_set.raddr_a) && !(ID_REG_RWAB_AFFORD(inst.raddr_a, ID_REG_RWAB_RA)))
+		warning_q(__LINE__, "raddr_a cannot read from rb\n");
 
-			if ((inst.is_set.raddr_b) && !(ID_REG_RWAB_AFFORD(inst.raddr_b, ID_REG_RWAB_RB)))
-				warning_q(__LINE__, "raddr_b cannot read from ra\n");
-
-			break;
-
-		case INST_BRA:
-			break;
-
-		case INST_LI:
-			break;
-
-		case INST_SEM:
-			break;
-
-		default:
-			error_q(__LINE__, "Unknown inst.inst\n");
-	}
+	if ((inst.is_set.raddr_b) && !(ID_REG_RWAB_AFFORD(inst.raddr_b, ID_REG_RWAB_RB)))
+		warning_q(__LINE__, "raddr_b cannot read from ra\n");
 }
 
 static void alu_sig(inst_sig_t inst_sig)
