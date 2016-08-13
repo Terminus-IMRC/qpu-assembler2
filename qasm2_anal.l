@@ -1283,14 +1283,14 @@ static void inst_warning()
 					   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
 					|| (!inst.is_set.ws)
 				)
-				&& !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WA))
+				&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WA)))
 			)
 				warning_q(__LINE__, "waddr_add with ws=0 cannot write to rb\n");
 
 			if (
 				   (inst.is_set.waddr_add)
 				&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
-				&& !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WB))
+				&& ((inst.is_set.waddr_add) && !(ID_REG_RWAB_AFFORD(inst.waddr_add, ID_REG_RWAB_WB)))
 			)
 				warning_q(__LINE__, "waddr_add with ws=1 cannot write to ra\n");
 
@@ -1300,14 +1300,14 @@ static void inst_warning()
 					   ((inst.is_set.ws) && (inst.ws == INST_WS_0))
 					|| (!inst.is_set.ws)
 				)
-				&& !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WB))
+				&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WB)))
 			)
 				warning_q(__LINE__, "waddr_mul with ws=0 cannot write to ra\n");
 
 			if (
 				   (inst.is_set.waddr_mul)
 				&& ((inst.is_set.ws) && (inst.ws == INST_WS_1))
-				&& !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WA))
+				&& ((inst.is_set.waddr_mul) && !(ID_REG_RWAB_AFFORD(inst.waddr_mul, ID_REG_RWAB_WA)))
 			)
 				warning_q(__LINE__, "waddr_mul with ws=1 cannot write to rb\n");
 			break;
