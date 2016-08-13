@@ -1873,6 +1873,8 @@ static inst_imm_t midimm_to_imm(midimm_t midimm)
 		case MIDIMM_TYPE_FLOAT:
 			return midimm.fval;
 	}
+	error_q(__LINE__, "Unreachable\n");
+	return 0;
 }
 
 static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str)
