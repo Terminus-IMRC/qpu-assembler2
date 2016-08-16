@@ -29,7 +29,7 @@ void diskstorage_init(diskstorage_t *dstp)
 {
 	int fd;
 	int umask_set, umask_orig;
-	char filename[] = "tmp-ds-XXXXXX";
+	char filename[] = "temp-ds-XXXXXXXXXXXXXXXXXXXXXXXX";
 	int ret;
 
 	umask_set = S_IXUSR | S_IRWXG | S_IRWXO;
@@ -41,12 +41,6 @@ void diskstorage_init(diskstorage_t *dstp)
 		exit(EXIT_FAILURE);
 	}
 
-	ret = unlink(filename);
-	if (ret == -1) {
-		error_fl(__FILE__, __LINE__, "unlink: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
 	ret = ftruncate(fd, 0);
 	if (ret == -1) {
 		error_fl(__FILE__, __LINE__, "ftruncate: %s\n", strerror(errno));
@@ -55,6 +49,7 @@ void diskstorage_init(diskstorage_t *dstp)
 
 	dstp->fd = fd;
 	dstp->len_max = 0;
+	dstp->filename = strdup(filename);
 }
 
 void diskstorage_finalize(diskstorage_t *dstp)
@@ -68,6 +63,14 @@ void diskstorage_finalize(diskstorage_t *dstp)
 		exit(EXIT_FAILURE);
 	}
 
+	ret = unlink(dstp->filename);
+	if (ret == -1) {
+		error_fl(__FILE__, __LINE__, "unlink: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	free(dstp->filename);
+	dstp->filename = NULL;
 	dstp->fd = -1;
 	dstp->len_max = 0;
 }
