@@ -14,7 +14,6 @@
 		int fd;
 		int len_max;
 		int n;
-		char *filename;
 	} diskstorage_t;
 
 	void diskstorage_init(diskstorage_t *dstp);

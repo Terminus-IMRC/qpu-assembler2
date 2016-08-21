@@ -47,9 +47,14 @@ void diskstorage_init(diskstorage_t *dstp)
 		exit(EXIT_FAILURE);
 	}
 
+	ret = unlink(filename);
+	if (ret == -1) {
+		error_fl(__FILE__, __LINE__, "unlink: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
 	dstp->fd = fd;
 	dstp->len_max = 0;
-	dstp->filename = strdup(filename);
 }
 
 void diskstorage_finalize(diskstorage_t *dstp)
@@ -63,14 +68,6 @@ void diskstorage_finalize(diskstorage_t *dstp)
 		exit(EXIT_FAILURE);
 	}
 
-	ret = unlink(dstp->filename);
-	if (ret == -1) {
-		error_fl(__FILE__, __LINE__, "unlink: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	free(dstp->filename);
-	dstp->filename = NULL;
 	dstp->fd = -1;
 	dstp->len_max = 0;
 }
