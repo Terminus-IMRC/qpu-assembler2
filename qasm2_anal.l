@@ -1025,7 +1025,7 @@ static void inst_subst_not_sets()
 } while (0)
 
 		case INST_ALU:
-			set_if_not_set(sig, INST_SIG_SB);
+			set_if_not_set(sig, INST_SIG_NS);
 			set_if_not_set(unpack, INST_UNPACK_3232);
 			set_if_not_set(pm, INST_PM_0);
 			set_if_not_set(pack, INST_PACK_3232);
