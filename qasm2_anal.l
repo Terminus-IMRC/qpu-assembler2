@@ -1565,9 +1565,9 @@ static void sem_sem(inst_sem_t inst_sem)
 /* cond_(add|mul) */
 static id_cond_addmul_t str_to_id_cond_addmul(const char *str)
 {
-	if (!strncmp(str, "cond_add", 8))
+	if      (!strncmp(str, "cond_add=", 9))
 		return ID_COND_ADDMUL_COND_ADD;
-	else if (!strncmp(str, "cond_mul", 8))
+	else if (!strncmp(str, "cond_mul=", 9))
 		return ID_COND_ADDMUL_COND_MUL;
 	else {
 		error_q(__LINE__, "Invalid token for cond_addmul_t: %s\n", str);
@@ -1578,13 +1578,13 @@ static id_cond_addmul_t str_to_id_cond_addmul(const char *str)
 /* [rw]addr_(add|mul|a|b) */
 static id_rwaddr_addmulab_t str_to_id_rwaddr_addmulab(const char *str)
 {
-	if (!strncmp(str, "waddr_add", 9))
+	if      (!strncmp(str, "waddr_add=", 10))
 		return ID_RWADDR_ADDMULAB_WADDR_ADD;
-	else if (!strncmp(str, "waddr_mul", 9))
+	else if (!strncmp(str, "waddr_mul=", 10))
 		return ID_RWADDR_ADDMULAB_WADDR_MUL;
-	else if (!strncmp(str, "raddr_a", 7))
+	else if (!strncmp(str, "raddr_a=", 8))
 		return ID_RWADDR_ADDMULAB_RADDR_A;
-	else if (!strncmp(str, "raddr_b", 7))
+	else if (!strncmp(str, "raddr_b=", 8))
 		return ID_RWADDR_ADDMULAB_RADDR_B;
 	else {
 		error_q(__LINE__, "Invalid token for rwaddr_addmul_t: %s\n", str);
@@ -1595,13 +1595,13 @@ static id_rwaddr_addmulab_t str_to_id_rwaddr_addmulab(const char *str)
 /* (add|mul)_[ab] */
 static id_addmul_ab_t str_to_id_addmul_ab(const char *str)
 {
-	if (!strncmp(str, "add_a", 5))
+	if      (!strncmp(str, "add_a=", 6))
 		return ID_ADDMUL_AB_ADD_A;
-	else if (!strncmp(str, "add_b", 5))
+	else if (!strncmp(str, "add_b=", 6))
 		return ID_ADDMUL_AB_ADD_B;
-	else if (!strncmp(str, "mul_a", 5))
+	else if (!strncmp(str, "mul_a=", 6))
 		return ID_ADDMUL_AB_MUL_A;
-	else if (!strncmp(str, "mul_b", 5))
+	else if (!strncmp(str, "mul_b=", 6))
 		return ID_ADDMUL_AB_MUL_B;
 	else {
 		error_q(__LINE__, "Invalid token for addmul_ab_t: %s\n", str);
