@@ -21,7 +21,7 @@
 int32_t strtoint32_ex(const char *str, char **endptr)
 {
 	int i, j, str_len, base, sign = 0;
-	long int num;
+	unsigned long int num;
 	char *str_prop = NULL;
 
 	/* Skip spaces. */
@@ -60,9 +60,19 @@ int32_t strtoint32_ex(const char *str, char **endptr)
 
 	errno = 0;
 	num = strtoul(str_prop, endptr, base);
-	if (((errno == ERANGE) && ((unsigned long int) num == ULONG_MAX)) || ((errno != 0) && (num == 0))) {
+	if (errno != 0) {
 		error_fl(__FILE__, __LINE__, "strtoul: %s: %s (base=%d)\n", strerror(errno), str_prop, base);
 		return (num == LONG_MAX) ? INT32_MAX : 0;
+	} else if (sizeof(unsigned long) > (32 / 8)) {
+		if ((sign > 0) && (num >> 32)) {
+			error_fl(__FILE__, __LINE__, "The result is too large for 32bit: %s (base=%d)\n", str_prop, base);
+			errno = ERANGE;
+			return INT32_MAX;
+		} else if ((sign < 0) && (num != ((unsigned long int) 1 << 31)) && (num >> 31)) {
+			error_fl(__FILE__, __LINE__, "The result is too small for 32bit: -%s (base=%d)\n", str_prop, base);
+			errno = ERANGE;
+			return INT32_MIN;
+		}
 	}
 
 	if (endptr != NULL) {

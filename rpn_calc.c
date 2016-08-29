@@ -143,7 +143,7 @@ int rpn_calc_do(int32_t *retval, const char *str_arg)
 
 			errno = 0;
 			val = strtoint32_ex(token, &endptr);
-			if ((val == INT32_MAX) || ((val == 0) && (errno != 0)))
+			if (errno != 0)
 				return 1;
 			if (*endptr != '\0') {
 				error_fl(__FILE__, __LINE__, "error: Unknown token: %s\n", token);
