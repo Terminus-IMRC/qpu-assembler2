@@ -532,7 +532,7 @@ static inst_simm_t midimm_to_simm(midimm_t midimm);
 static inst_simm_t midimm_to_simm_vr(midimm_t midimm);
 static inst_imm_t midimm_to_imm(midimm_t midimm);
 
-static void imms_rpn_save(const saved_imm_type_t imm_type, const char *str);
+static void imms_rpn_save(const saved_imm_type_t imm_type, const char *str, const _Bool to_remove_surrounding_chars);
 static void imms_rpn_save_or_expand(const saved_imm_type_t imm_type, const char *str);
 
 static char* remove_surrounding_chars(const char *str);
@@ -568,6 +568,7 @@ static void abort_assemble(const int line);
 simm=`[^`\n\r]+`/{sep}   imms_rpn_save_or_expand(SAVED_IMM_TYPE_SIMM, yytext + 5);
 simm=vr`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_VRSIMM, yytext + 7);
 imm=([+-]?)[0-9box_]+    li_imm(midimm_to_imm(rpn_to_midimm(yytext + 4, 0)));
+imm=:[a-zA-Z0-9.,/+-]+   imms_rpn_save(SAVED_IMM_TYPE_IMM, yytext + 4, 0);
 imm=`[^`\n\r]+`/{sep}    imms_rpn_save_or_expand(SAVED_IMM_TYPE_IMM, yytext + 4);
 
 {space}+ ;
@@ -1880,10 +1881,8 @@ static inst_imm_t midimm_to_imm(midimm_t midimm)
 	return 0;
 }
 
-static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str)
+static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str, const _Bool to_remove_surrounding_chars)
 {
-	char *imms = NULL;
-
 	if (inst.saved_imm_type != SAVED_IMM_TYPE_NONE)
 		error_q(__LINE__, "Immediate is already set\n");
 
@@ -1909,9 +1908,12 @@ static void imms_rpn_save(const saved_imm_type_t saved_imm_type, const char *str
 			break;
 	}
 
-	imms = remove_surrounding_chars(str);
-	diskstorage_append(imms, strlen(imms), &ds_imms_str);
-	free(imms);
+	if (to_remove_surrounding_chars) {
+		char *imms = remove_surrounding_chars(str);
+		diskstorage_append(imms, strlen(imms), &ds_imms_str);
+		free(imms);
+	} else
+		diskstorage_append(str, strlen(str), &ds_imms_str);
 	inst.saved_imm_type = saved_imm_type;
 }
 
@@ -1951,7 +1953,7 @@ static void imms_rpn_save_or_expand(const saved_imm_type_t saved_imm_type, const
 	}
 
 	if (does_involve_colon)
-		imms_rpn_save(saved_imm_type, str);
+		imms_rpn_save(saved_imm_type, str, 1);
 }
 
 /* Removes [0] and [len - 1] and returns a free(3)'able pointer. */
