@@ -567,6 +567,7 @@ static void abort_assemble(const int line);
 
 simm=`[^`\n\r]+`/{sep}   imms_rpn_save_or_expand(SAVED_IMM_TYPE_SIMM, yytext + 5);
 simm=vr`[^`\n\r]+`/{sep} imms_rpn_save_or_expand(SAVED_IMM_TYPE_VRSIMM, yytext + 7);
+imm=([+-]?)[0-9box_]+    li_imm(midimm_to_imm(rpn_to_midimm(yytext + 4, 0)));
 imm=`[^`\n\r]+`/{sep}    imms_rpn_save_or_expand(SAVED_IMM_TYPE_IMM, yytext + 4);
 
 {space}+ ;
