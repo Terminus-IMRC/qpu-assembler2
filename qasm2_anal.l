@@ -16,6 +16,8 @@ sep ({space}+|{newline})
 #include "qasm2_anal.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <inttypes.h>
 #include <setjmp.h>
 #include "rpn_calc.h"
@@ -2148,5 +2150,111 @@ int qasm2_assemble_file(FILE *fp)
 	yylex();
 	assemble_finalize();
 	yy_delete_buffer(state);
+	return 0;
+}
+
+int qasm2_assemble_string(const char *str)
+{
+	qasm2_assemble_string_t qt;
+	int reti;
+
+	reti = qasm2_assemble_string_start(&qt);
+	if (reti != 0)
+		return reti;
+
+	reti = qasm2_assemble_string_append(str, &qt);
+	if (reti != 0)
+		return reti;
+
+	reti = qasm2_assemble_string_end(&qt);
+	if (reti != 0)
+		return reti;
+
+	return 0;
+}
+
+int qasm2_assemble_string_start(qasm2_assemble_string_t *qtp)
+{
+	int fd;
+	int umask_set, umask_orig;
+	char filename[] = "temp-qs-XXXXXXXXXXXXXXXXXXXXXXXX";
+	int reti;
+
+	umask_set = S_IXUSR | S_IRWXG | S_IRWXO;
+	umask_orig = umask(umask_set);
+	fd = mkstemp(filename);
+	umask(umask_orig);
+	if (fd == -1) {
+		error_fl(__FILE__, __LINE__, "mkstemp: %s\n", strerror(errno));
+		return 1;
+	}
+
+	reti = ftruncate(fd, 0);
+	if (reti == -1) {
+		error_fl(__FILE__, __LINE__, "ftruncate: %s\n", strerror(errno));
+		return 1;
+	}
+
+	reti = unlink(filename);
+	if (reti == -1) {
+		error_fl(__FILE__, __LINE__, "unlink: %s\n", strerror(errno));
+		return 1;
+	}
+
+	qtp->fd = fd;
+
+	return 0;
+}
+
+int qasm2_assemble_string_append(const char *str, qasm2_assemble_string_t *qtp)
+{
+	int fd = qtp->fd;
+	ssize_t retss;
+
+	retss = write(fd, str, strlen(str));
+	if (retss == -1) {
+		error_fl(__FILE__, __LINE__, "write: %s\n", strerror(errno));
+		return 1;
+	}
+
+	return 0;
+}
+
+int qasm2_assemble_string_end(qasm2_assemble_string_t *qtp)
+{
+	int fd = qtp->fd;
+	char nl = '\n';
+	FILE *fp = NULL;
+	int reti;
+	ssize_t retss;
+
+	retss = write(fd, &nl, sizeof(nl));
+	if (retss == -1) {
+		error_fl(__FILE__, __LINE__, "write: %s\n", strerror(errno));
+		return 1;
+	}
+
+	fp = fdopen(fd, "r");
+	if (fp == NULL) {
+		error_fl(__FILE__, __LINE__, "fdopen: %s\n", strerror(errno));
+		return 1;
+	}
+
+	reti = fseek(fp, 0, SEEK_SET);
+	if (reti == -1) {
+		error_fl(__FILE__, __LINE__, "fseek: %s\n", strerror(errno));
+		return 1;
+	}
+
+	reti = qasm2_assemble_file(fp);
+	if (reti != 0)
+		return reti;
+
+	reti = fclose(fp);
+	if (reti == EOF) {
+		error_fl(__FILE__, __LINE__, "fclose: %s\n", strerror(errno));
+		return 1;
+	}
+
 	return 0;
 }

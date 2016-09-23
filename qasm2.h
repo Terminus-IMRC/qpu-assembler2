@@ -12,6 +12,14 @@
 
 #include <stdio.h>
 
+	typedef struct {
+		int fd;
+	} qasm2_assemble_string_t;
+
 	int qasm2_assemble_file(FILE *fp);
+	int qasm2_assemble_string(const char *str);
+	int qasm2_assemble_string_start(qasm2_assemble_string_t *qtp);
+	int qasm2_assemble_string_append(const char *str, qasm2_assemble_string_t *qtp);
+	int qasm2_assemble_string_end(qasm2_assemble_string_t *qtp);
 
 #endif /* QASM2_H_INCLUDED_ */
