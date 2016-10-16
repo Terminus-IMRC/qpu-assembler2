@@ -543,7 +543,7 @@ static char* remove_trailing_spaces_and_newlines(const char *str);
 static void print_inst();
 static void print_bin(const uint64_t u, unsigned int width, const _Bool to_print_space);
 
-static void error_invalid_character(const char c);
+static void error_invalid_string(const char *s);
 static void error_q(const int line, const char *format, ...);
 static void warning_q(const int line, const char *format, ...);
 static void abort_assemble(const int line);
@@ -917,7 +917,7 @@ sem=15/{sep} sem_sem(INST_SEM_15);
  /* An instruction-only line. */
 {newline} end_of_line(0);
 
-. error_invalid_character(*yytext);
+.+ error_invalid_string(yytext);
 
 %%
 
@@ -2088,9 +2088,9 @@ static void print_bin(const uint64_t u, unsigned int width, const _Bool to_print
 		putchar(' ');
 }
 
-static void error_invalid_character(const char c)
+static void error_invalid_string(const char *s)
 {
-	error_q(__LINE__, "Invalid character: %c\n", c);
+	error_q(__LINE__, "Invalid string: %s\n", s);
 }
 
 static void error_q(const int line, const char *format, ...)
