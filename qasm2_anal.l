@@ -917,7 +917,7 @@ sem=15/{sep} sem_sem(INST_SEM_15);
  /* An instruction-only line. */
 {newline} end_of_line(0);
 
-.+ error_invalid_string(yytext);
+. error_invalid_string(yytext);
 
 %%
 
