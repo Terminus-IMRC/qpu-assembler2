@@ -8,8 +8,11 @@ CC := gcc
 LEX := lex
 AR := ar
 RANLIB := ranlib
+INSTALL := install
 RM := rm -f
 CTAGS := ctags
+
+PREFIX ?= /usr/local
 
 all:
 
@@ -25,7 +28,7 @@ ALLDEPS = $(MAKEFILE_LIST_SANS_DEPS)
 .DELETE_ON_ERROR: $(SRCS_L_C)
 .DELETE_ON_ERROR: $(DEPS)
 
-VALID_MAKECMDGOALS := all $(TARGETS) %.c.o %.c.d %.l.c clean tags
+VALID_MAKECMDGOALS := all $(TARGETS) %.c.o %.c.d %.l.c install clean tags
 NONEED_DEP_MAKECMDGOALS := clean tags
 
 EXTRA_MAKECMDGOALS := $(filter-out $(VALID_MAKECMDGOALS), $(MAKECMDGOALS))
@@ -77,6 +80,12 @@ libqasm2.so: $(OBJS_WITHOUT_MAIN) $(ALLDEPS)
 	$(LEX.l) $< >$@
 
 %.l:
+
+.PHONY: install
+install: $(TARGETS)
+	$(INSTALL) -D -t "$(DESTDIR)/$(PREFIX)/bin/" qasm2
+	$(INSTALL) -D -t "$(DESTDIR)/$(PREFIX)/include/" qasm2.h
+	$(INSTALL) -D -t "$(DESTDIR)/$(PREFIX)/lib/" libqasm2.so libqasm2.a
 
 .PHONY: clean
 clean:
