@@ -1260,6 +1260,10 @@ static void inst_warning()
 			|| ((inst.is_set.mul_a) && (inst.mul_a == INST_ADDMUL_AB_RB))
 			|| ((inst.is_set.mul_b) && (inst.mul_b == INST_ADDMUL_AB_RB))
 		)
+		&& ((inst.is_set.sig) && (inst.sig == INST_SIG_SIMM)) && !(
+			   (inst.simm >= INST_SIMM_VRR5)
+			&& (inst.simm <= INST_SIMM_VR15)
+		)
 	)
 		warning_q(__LINE__, "raddr_b is not nop or simm is set but is not referred\n");
 
