@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+#
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+clean::
+	$(MAKE) clean
+
+build/qasm2::
+	$(MAKE) CFLAGS="$(shell dpkg-buildflags --get CFLAGS)" LDFLAGS="$(shell dpkg-buildflags --get LDFLAGS) -Wl,-soname,libqasm2.so.0"
+
+install/qasm2::
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/qasm2 PREFIX=/usr
+	rm $(CURDIR)/debian/qasm2/usr/include/qasm2.h
+	rm -rf $(CURDIR)/debian/qasm2/usr/include
+	rm -rf $(CURDIR)/debian/qasm2/usr/lib
+
+build/libqasm2-0::
+	$(MAKE) CFLAGS="$(shell dpkg-buildflags --get CFLAGS)" LDFLAGS="$(shell dpkg-buildflags --get LDFLAGS) -Wl,-soname,libqasm2.so.0"
+
+install/libqasm2-0::
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/libqasm2-0 PREFIX=/usr
+	rm $(CURDIR)/debian/libqasm2-0/usr/include/qasm2.h
+	rm -rf $(CURDIR)/debian/libqasm2-0/usr/bin
+	rm -rf $(CURDIR)/debian/libqasm2-0/usr/include
+	rm -rf $(CURDIR)/debian/libqasm2-0/usr/lib/libqasm2.a
+	mv $(CURDIR)/debian/libqasm2-0/usr/lib/libqasm2.so $(CURDIR)/debian/libqasm2-0/usr/lib/libqasm2.so.0
+
+build/libqasm2-dev::
+	$(MAKE) CFLAGS="$(shell dpkg-buildflags --get CFLAGS)" LDFLAGS="$(shell dpkg-buildflags --get LDFLAGS) -Wl,-soname,libqasm2.so.0"
+
+install/libqasm2-dev::
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/libqasm2-dev PREFIX=/usr
+	rm -rf $(CURDIR)/debian/libqasm2-dev/usr/bin
+	rm -rf $(CURDIR)/debian/libqasm2-dev/usr/lib/libqasm2.so

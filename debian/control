@@ -1,0 +1,26 @@
+Source: qpu-assembler2
+Section: devel
+Priority: extra
+Maintainer: Sugizaki Yukimasa <i.can.speak.c.and.basic@gmail.com>
+Build-Depends: cdbs, debhelper (>=9), flex
+Standards-Version: 3.9.6
+
+Package: qasm2
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Yet another assembler for VideoCore
+ An assembler for VideoCore
+
+Package: libqasm2-0
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Yet another assembler for VideoCore library
+ A library for VideoCore assembler
+
+Package: libqasm2-dev
+Architecture: any
+Section: libdevel
+Depends: ${misc:Depends}
+Description: Yet another assembler for VideoCore library
+ A development files for VideoCore assembler
