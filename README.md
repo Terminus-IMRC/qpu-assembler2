@@ -3,6 +3,16 @@
 Yet another assembler for VideoCore IV QPU.
 
 
+## Requirements
+
+You need to install `flex` (`lex` command) to compile qpu-assembler2.
+On Debian dists, do:
+
+```
+$ sudo apt-get install flex
+```
+
+
 ## Compiling
 
 ```
