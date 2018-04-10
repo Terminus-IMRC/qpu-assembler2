@@ -13,10 +13,16 @@ $ sudo apt-get install flex
 ```
 
 
-## Compiling
+## Building
 
 ```
 $ make
+```
+
+You can build Debian package by doing:
+
+```
+$ debuild -us -uc
 ```
 
 
